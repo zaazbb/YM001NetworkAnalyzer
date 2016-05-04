@@ -16,7 +16,99 @@
   <widget class="QWidget" name="centralWidget">
    <layout class="QVBoxLayout" name="verticalLayout" stretch="1,0">
     <item>
-     <widget class="QTreeWidget" name="treeWidget"/>
+     <layout class="QHBoxLayout" name="horizontalLayout" stretch="1,0">
+      <item>
+       <widget class="QTreeWidget" name="treeWidget">
+        <property name="uniformRowHeights">
+         <bool>false</bool>
+        </property>
+        <column>
+         <property name="text">
+          <string>mFrmType</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>mAck</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>mFrmIdx</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>mPanId</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>mDstAddr</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>mSrcAddr</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>nFrmType</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>nDstAddr</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>nSrdAddr</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>nFrmIdx</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>nRadius</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>nRouteLst</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>aFrmType</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>aDUI</string>
+         </property>
+        </column>
+       </widget>
+      </item>
+      <item>
+       <widget class="QTreeWidget" name="treeWidget_2">
+        <column>
+         <property name="text">
+          <string>域</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>值</string>
+         </property>
+        </column>
+       </widget>
+      </item>
+     </layout>
     </item>
     <item>
      <widget class="QPlainTextEdit" name="plainTextEdit"/>
