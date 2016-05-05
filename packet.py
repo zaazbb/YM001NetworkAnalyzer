@@ -134,24 +134,7 @@ def PacketParser(pkt):
     if macfcd.FTD == 0:
         # beacon.
         cmdinfo[0]['cmdInfo'] = 'mBeacon'
-        cmdinfo[1]['tsmtRndDly'] = str(pkt[i])
-        i += 1
-        cmdinfo[1]['beaconRound'] = str(pkt[i])
-        i += 1
-        tslotlv = TimeslotLevel.from_buffer(pkt[i:i+2])
-        cmdinfo[1]['timeSlot'] = str(tslotlv.timeSlot)
-        cmdinfo[1]['level'] = str(tslotlv.level)
-        i += 2
-        cmdinfo[1]['beaconInd'] = str(pkt[i])
-        i += 1
-        cmdinfo[1]['nwkCapacity'] =  str(int.from_bytes(pkt[i:i+2], 'little'))
-        i += 2
-        cmdinfo[1]['fiThreshold'] = str(pkt[i])
-        i += 1
-        cmdinfo[1]['cnPanId'] =  reverse_hex(pkt[i:i+2])
-        i += 2
-        cmdinfo[1]['cnAddr'] = reverse_hex(pkt[i:i+6])
-        #i += 6
+        cmdinfo[1] = parse_beacon(pkt[i:])
     elif macfcd.FTD == 2:
         # ack.
         #cmdinfo[0]['cmdInfo'] = 'mAck'
@@ -493,6 +476,31 @@ def PacketParser(pkt):
                     cmdinfo[1]['reportType'] = '--'
     #return pktdict
     return baseinfo, cmdinfo
+    
+
+def parse_beacon(pkt):
+    i = 0
+    cmdinfo = {}
+    cmdinfo['tsmtRndDly'] = str(pkt[i])
+    i += 1
+    cmdinfo['beaconRound'] = str(pkt[i])
+    i += 1
+    tslotlv = TimeslotLevel.from_buffer(pkt[i:i+2])
+    cmdinfo['timeSlot'] = str(tslotlv.timeSlot)
+    cmdinfo['level'] = str(tslotlv.level)
+    i += 2
+    cmdinfo['beaconInd'] = str(pkt[i])
+    i += 1
+    cmdinfo['nwkCapacity'] =  str(int.from_bytes(pkt[i:i+2], 'little'))
+    i += 2
+    cmdinfo['fiThreshold'] = str(pkt[i])
+    i += 1
+    cmdinfo['cnPanId'] =  reverse_hex(pkt[i:i+2])
+    i += 2
+    cmdinfo['cnAddr'] = reverse_hex(pkt[i:i+6])
+    #i += 6
+    return cmdinfo
+
     
 if __name__ == '__main__':
     d = bytearray.fromhex(
