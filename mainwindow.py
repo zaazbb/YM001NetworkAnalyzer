@@ -1,6 +1,6 @@
 
 from PyQt5.QtWidgets import QMainWindow, QTreeWidgetItem
-from PyQt5.QtCore import QTimer
+from PyQt5.QtCore import QTimer, pyqtSlot
 from Ui_mainwindow import Ui_MainWindow
 
 
@@ -10,7 +10,10 @@ class MainWindow(QMainWindow):
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
         
+        self.ui.splitter.setStretchFactor(0, 1)
+        
         self.conn = conn
+        self.buf = []
         
         self.timer = QTimer(self)
         self.timer.timeout.connect(self.update)
@@ -20,6 +23,28 @@ class MainWindow(QMainWindow):
     def update(self):
         if self.conn.poll():
             msg = self.conn.recv()
-            print(msg)
-            self.ui.treeWidget.insertTopLevelItems(
-                0, [QTreeWidgetItem(None, msg[0])])
+            #print(msg)
+            self.buf.append((msg[0], msg[1][0], msg[1][1], msg[2]))
+            msg[1][0].insert(0, str(msg[0]))
+            item = QTreeWidgetItem(None, msg[1][0])
+            self.ui.treeWidget.addTopLevelItem(item)
+            for i in range(self.ui.treeWidget.columnCount()):
+                 self.ui.treeWidget.resizeColumnToContents(i)
+            self.ui.treeWidget.scrollToItem(item)
+            
+    @pyqtSlot(QTreeWidgetItem, int)
+    def on_treeWidget_itemClicked(self, item, column):
+        index = self.ui.treeWidget.indexOfTopLevelItem(item)
+        self.ui.treeWidget_cmdinfo.clear()
+        self.ui.treeWidget_cmdinfo.addTopLevelItem(QTreeWidgetItem(None, ('cmdInfo', self.buf[index][2][0]['cmdInfo'])))
+        if 'cmdType' in self.buf[index][2][0]:
+            self.ui.treeWidget_cmdinfo.addTopLevelItem(QTreeWidgetItem(None, ('cmdType', self.buf[index][2][0]['cmdType'])))
+        self.ui.treeWidget_cmdinfo.addTopLevelItem(QTreeWidgetItem(None, ('--', '--')))
+        for i in self.buf[index][2][1].items():
+            self.ui.treeWidget_cmdinfo.addTopLevelItem(QTreeWidgetItem(None, i))
+        self.ui.treeWidget_cmdinfo.resizeColumnToContents(0)
+        self.ui.plainTextEdit_rawdata.setPlainText(self.buf[index][3])
+        
+    @pyqtSlot(QTreeWidgetItem, int)
+    def on_treeWidget_cmdinfo_itemClicked(self, item, column):
+        self.ui.plainTextEdit_cinfoval.setPlainText(item.text(1))

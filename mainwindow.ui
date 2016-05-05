@@ -14,104 +14,136 @@
    <string>MainWindow</string>
   </property>
   <widget class="QWidget" name="centralWidget">
-   <layout class="QVBoxLayout" name="verticalLayout" stretch="1,0">
+   <layout class="QHBoxLayout" name="horizontalLayout" stretch="5,1">
     <item>
-     <layout class="QHBoxLayout" name="horizontalLayout" stretch="1,0">
-      <item>
-       <widget class="QTreeWidget" name="treeWidget">
-        <property name="uniformRowHeights">
-         <bool>false</bool>
+     <widget class="QSplitter" name="splitter">
+      <property name="orientation">
+       <enum>Qt::Vertical</enum>
+      </property>
+      <widget class="QTreeWidget" name="treeWidget">
+       <property name="indentation">
+        <number>0</number>
+       </property>
+       <property name="uniformRowHeights">
+        <bool>false</bool>
+       </property>
+       <property name="headerHidden">
+        <bool>false</bool>
+       </property>
+       <column>
+        <property name="text">
+         <string>time</string>
         </property>
-        <column>
-         <property name="text">
-          <string>mFrmType</string>
-         </property>
-        </column>
-        <column>
-         <property name="text">
-          <string>mAck</string>
-         </property>
-        </column>
-        <column>
-         <property name="text">
-          <string>mFrmIdx</string>
-         </property>
-        </column>
-        <column>
-         <property name="text">
-          <string>mPanId</string>
-         </property>
-        </column>
-        <column>
-         <property name="text">
-          <string>mDstAddr</string>
-         </property>
-        </column>
-        <column>
-         <property name="text">
-          <string>mSrcAddr</string>
-         </property>
-        </column>
-        <column>
-         <property name="text">
-          <string>nFrmType</string>
-         </property>
-        </column>
-        <column>
-         <property name="text">
-          <string>nDstAddr</string>
-         </property>
-        </column>
-        <column>
-         <property name="text">
-          <string>nSrdAddr</string>
-         </property>
-        </column>
-        <column>
-         <property name="text">
-          <string>nFrmIdx</string>
-         </property>
-        </column>
-        <column>
-         <property name="text">
-          <string>nRadius</string>
-         </property>
-        </column>
-        <column>
-         <property name="text">
-          <string>nRouteLst</string>
-         </property>
-        </column>
-        <column>
-         <property name="text">
-          <string>aFrmType</string>
-         </property>
-        </column>
-        <column>
-         <property name="text">
-          <string>aDUI</string>
-         </property>
-        </column>
-       </widget>
-      </item>
-      <item>
-       <widget class="QTreeWidget" name="treeWidget_2">
-        <column>
-         <property name="text">
-          <string>域</string>
-         </property>
-        </column>
-        <column>
-         <property name="text">
-          <string>值</string>
-         </property>
-        </column>
-       </widget>
-      </item>
-     </layout>
+       </column>
+       <column>
+        <property name="text">
+         <string>fType</string>
+        </property>
+       </column>
+       <column>
+        <property name="text">
+         <string>ack</string>
+        </property>
+       </column>
+       <column>
+        <property name="text">
+         <string>fIdx</string>
+        </property>
+       </column>
+       <column>
+        <property name="text">
+         <string>PID</string>
+        </property>
+       </column>
+       <column>
+        <property name="text">
+         <string>dst</string>
+        </property>
+       </column>
+       <column>
+        <property name="text">
+         <string>src</string>
+        </property>
+       </column>
+       <column>
+        <property name="text">
+         <string>fType</string>
+        </property>
+       </column>
+       <column>
+        <property name="text">
+         <string>dst</string>
+        </property>
+       </column>
+       <column>
+        <property name="text">
+         <string>src</string>
+        </property>
+       </column>
+       <column>
+        <property name="text">
+         <string>fIdx</string>
+        </property>
+       </column>
+       <column>
+        <property name="text">
+         <string>R</string>
+        </property>
+       </column>
+       <column>
+        <property name="text">
+         <string>routeLst</string>
+        </property>
+       </column>
+       <column>
+        <property name="text">
+         <string>fType</string>
+        </property>
+       </column>
+       <column>
+        <property name="text">
+         <string>DUI</string>
+        </property>
+       </column>
+      </widget>
+      <widget class="QPlainTextEdit" name="plainTextEdit_log"/>
+     </widget>
     </item>
     <item>
-     <widget class="QPlainTextEdit" name="plainTextEdit"/>
+     <layout class="QVBoxLayout" name="verticalLayout" stretch="4,1,2">
+      <item>
+       <widget class="QTreeWidget" name="treeWidget_cmdinfo">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="indentation">
+         <number>0</number>
+        </property>
+        <attribute name="headerVisible">
+         <bool>true</bool>
+        </attribute>
+        <column>
+         <property name="text">
+          <string>key</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>value</string>
+         </property>
+        </column>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPlainTextEdit" name="plainTextEdit_cinfoval"/>
+      </item>
+      <item>
+       <widget class="QPlainTextEdit" name="plainTextEdit_rawdata"/>
+      </item>
+     </layout>
     </item>
    </layout>
   </widget>
