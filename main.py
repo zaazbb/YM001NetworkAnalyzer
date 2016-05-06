@@ -12,11 +12,11 @@ if __name__ == '__main__':
     import sys
     from PyQt5.QtWidgets import QApplication
     from mainwindow import MainWindow
-
+    
     app = QApplication(sys.argv)
     mainWin = MainWindow(parent_conn)
     mainWin.show()
     
     sys.exit(app.exec_())
     
-    #p.join()
+    p.join()

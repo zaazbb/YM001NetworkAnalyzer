@@ -7,7 +7,7 @@ from ctypes import Structure, c_ushort, c_ubyte, c_uint
 SHR = b'\xFE' * 4
 
 
-class _MacFCD(Structure):
+class MacFCD(Structure):
     _fields_ = [('FTD',         c_ushort, 3),
                 ('secureEn',    c_ushort, 1),
                 ('frmHangup',   c_ushort, 1),
@@ -19,23 +19,26 @@ class _MacFCD(Structure):
                 ('dstAddrMode', c_ushort, 2),
                 ('frmVer',      c_ushort, 2),
                 ('srcAddrMode', c_ushort, 2)]
-
-_MacFrmType = ('Beacon', 'Data', 'Ack', 'Cmd',
-               'Reserve', 'Reserve', 'Reserve', 'Reserve')
-               
+                
 class TimeslotLevel(Structure):
     _fields_ = [('timeSlot',    c_ushort,  10), 
                     ('level',   c_ushort,  4), 
                     ('reserve',  c_ushort,  2)]
 
-class _NwkFCD(Structure):
+mac_ftype = ('mBeacon', 'mData', 'mAck', 'mCmd',
+               'mReserve', 'mReserve', 'mReserve', 'mReserve')
+
+AddrLen = 0, 0, 2, 6
+
+
+class NwkFCD(Structure):
     _fields_ = [('FTD',         c_ubyte, 2),
                 ('dstAddrMode', c_ubyte, 2),
                 ('srcAddrMode', c_ubyte, 2),
                 ('reserve',     c_ubyte, 1),
                 ('routeInd',    c_ubyte, 1)]
 
-class _NwkRouteInfo(Structure):
+class NwkRouteInfo(Structure):
     _fields_ = [('number',      c_uint, 5),
                 ('index',       c_uint, 5),
                 ('addrMode0',   c_uint, 2),
@@ -45,16 +48,7 @@ class _NwkRouteInfo(Structure):
                 ('addrMode4',   c_uint, 2),
                 ('addrMode5',   c_uint, 2),
                 ('reserve',     c_uint, 2)]
-
-_NwkFrmType = 'Data', 'Cmd', 'Reserve', 'Reserve'
-
-#NwkCmdType = (
-#    '--',  'joinNwkReq', 'joinNwkResp', 'routeErr', 
-#    '--',  '--',  '--',  '--',  '--',  '--',  
-#    'fiGatherCmd', 'fiGatherResp',  'cfgSn',  
-#    'cfgSnResp',  '--',  '--',  
-#    'fNdRdy')
-
+                
 class NwkCfgSnOpt(Structure):
     _fields_ = [('timeSlot', c_ubyte, 1), 
                     ('level', c_ubyte, 1), 
@@ -65,19 +59,24 @@ class NwkCfgSnOpt(Structure):
                     ('reserve', c_ubyte, 1), 
                     ('offline', c_ubyte, 1)]
 
+nwk_ftype = 'nData', 'nCmd', 'nReserve', 'nReserve'
+nwk_ctype = {1:'ncJoinNwkReq', 2:'ncJoinNwkResp', 3:'ncRouteErr', 
+    0x10:'ncFiGather',  0x11:'ncFiGatherResp',  0x12:'ncCfgSn', 0x13:'ncCfgSnResp', 
+    0x16:'ncFreeNdRdy'}
+    
 
-class _ApsFCD(Structure):
+class ApsFCD(Structure):
     _fields_ = [('FTD',         c_ubyte, 3),
                 ('OEI',         c_ubyte, 1),
                 ('reserve',     c_ubyte, 4)]
 
-_ApsFrmType = ('AckNAck',  'Cmd', 'Route', 'Report', 
-               'Reserve', 'Reserve', 'Reserve', 'Reserve')
+aps_ftype = ('aAckNack',  'aCmd', 'aRoute', 'aReport', 
+               'aReserve', 'aReserve', 'aReserve', 'aReserve')
+aps_ctype = ('acCfgUart', 'acSetChnlGrp', 'acSetRssi', 
+    'acSetTsmtPower', 'acRdNdCfg', 'acDevReboot', 'acSoftUpgrade', 'acBcastTiming')
 
-ApsBaudrate = 'auto', '1200', '2400', '4800',  '9600', '19200'
+aps_baudrate = 'auto', '1200', '2400', '4800',  '9600', '19200'
 ApsTsmtPower = {0:'16dBm', 1:'10dBm', 2:'4dBm', 3:'-2dBm'}
-
-_AddrLen = 0, 0, 2, 6
 
 
 def reverse_hex(addr):
@@ -94,16 +93,16 @@ def PacketParser(pkt):
 #        return None, 'crc error'
     #pktdict = {'phy': {'infoChnlIdx': pkt[1], 'stdInd': pkt[2]}}
 
-    i = 4
+    i = 0
     
     # parse mac.
-    macfcd = _MacFCD.from_buffer(pkt[i:i+2])
+    macfcd = MacFCD.from_buffer(pkt[i:i+2])
     #pktdict['mac'] = {'frmType': macfcd.FTD,
     #                  'frmHangup': macfcd.frmHangup,
     #                  'ackReq': macfcd.ackReq,
     #                  'frmVer': macfcd.frmVer}
-    baseinfo = [_MacFrmType[macfcd.FTD], str(macfcd.ackReq)]
-    cmdinfo = [{}, {}]
+    baseinfo = [mac_ftype[macfcd.FTD], str(macfcd.ackReq)]
+    cmdinfo = {}
     i += 2
     if macfcd.frmIdxcompr:
         #pktdict['mac']['frmIdx'] = pkt[i]
@@ -117,11 +116,11 @@ def PacketParser(pkt):
         i += 2
     else:
         baseinfo.append('')
-    n = _AddrLen[macfcd.dstAddrMode]
+    n = AddrLen[macfcd.dstAddrMode]
     #pktdict['mac']['dstAddr'] = pkt[i:i+n]
     baseinfo.append(reverse_hex(pkt[i:i+n]))
     i += n
-    n = _AddrLen[macfcd.srcAddrMode]
+    n = AddrLen[macfcd.srcAddrMode]
     #pktdict['mac']['srcAddr'] = pkt[i:i+n]
     baseinfo.append(reverse_hex(pkt[i:i+n]))
     i += n
@@ -133,75 +132,36 @@ def PacketParser(pkt):
 
     if macfcd.FTD == 0:
         # beacon.
-        cmdinfo[0]['cmdInfo'] = 'mBeacon'
-        cmdinfo[1] = parse_beacon(pkt[i:])
+        cmdinfo = mac_beacon(pkt[i:])
     elif macfcd.FTD == 2:
         # ack.
-        #cmdinfo[0]['cmdInfo'] = 'mAck'
         pass
     elif macfcd.FTD == 3:
         # command
-        cmdinfo[0]['cmdInfo'] = 'mCmd'
-        i += 1
         if pkt[i] == 1:
             # network maintain req.
-            cmdinfo[0]['cmdType'] = 'nwkMaintainReq'
+            baseinfo[0] = 'mcNwkMntnReq'
             i += 1
-            pathn = pkt[i] & 0x0F
-            cmdinfo[1]['pathNodeNum'] = str(pathn)
-            cmdinfo[1]['pathIdx'] = str(pkt[i] >> 4)
-            i += 1
-            # pkt[0]+1-i = xn+n-1, 
-            # x = (pkt[0]+2-i)/n - 1
-            n = (pkt[0]+2-i)//pathn - 1
-            routers = []
-            fipowers = []
-            for ii in range(pathn):
-                routers.append(reverse_hex(pkt[i:i+n]))
-                i += n
-            for ii in range(pathn-1):
-                fipowers.append('%02X' % pkt[i])
-                i += 1
-            cmdinfo[1]['routers'] = '-'.join(routers)
-            cmdinfo[1]['fiPowers'] = '-'.join(fipowers)
-        else:
+            cmdinfo = nwk_nwk_maintain_req(pkt[i:])
+        elif pkt[i] == 2:
             # network maintain resp.
-            cmdinfo[0]['cmdType'] = 'nwkMaintainResp'
-            pathn = pkt[i] & 0x0F
-            cmdinfo[1]['pathNodeNum'] = str(pathn)
-            cmdinfo[1]['pathIdx'] = str(pkt[i] >> 4)
+            baseinfo[0] = 'mcNwkMntnResp'
             i += 1
-            # pkt[0]+1-i = xn+2n-2, 
-            # x = (pkt[0]+3-i)/n - 2
-            n = (pkt[0]+3-i)//pathn - 2
-            routers = []
-            fiDnpowers = []
-            fiUpPowers = []
-            for ii in range(pathn):
-                routers.append(reverse_hex(pkt[i:i+n]))
-                i += n
-            for ii in range(pathn-1):
-                fiDnpowers.append('%02X' % pkt[i])
-                i += 1
-            for ii in range(pathn-1):
-                fiUpPowers.append('%02X' % pkt[i])
-                i += 1
-            cmdinfo[1]['routers'] = '-'.join(routers)
-            cmdinfo[1]['fiDnPowers'] = '-'.join(fiDnpowers)
-            cmdinfo[1]['fiUpPowers'] = '-'.join(fiUpPowers)
-            
+            cmdinfo = nwk_nwk_maintain_resp(pkt[i:])
+        else:
+            baseinfo[0] = 'mcReserve'
     elif macfcd.FTD == 1:
         # data.
         # parse nwk.
-        nwkfcd = _NwkFCD.from_buffer(pkt[i:i+1])
+        nwkfcd = NwkFCD.from_buffer(pkt[i:i+1])
         #pktdict['nwk'] = {'frmType': nwkfcd.FTD}
-        baseinfo.append(_NwkFrmType[nwkfcd.FTD])
+        baseinfo[0] = nwk_ftype[nwkfcd.FTD]
         i += 1
-        n = _AddrLen[nwkfcd.dstAddrMode]
+        n = AddrLen[nwkfcd.dstAddrMode]
         #pktdict['nwk']['dstAddr'] = pkt[i:i+n]
         baseinfo.append(reverse_hex(pkt[i:i+n]))
         i += n
-        n = _AddrLen[nwkfcd.srcAddrMode]
+        n = AddrLen[nwkfcd.srcAddrMode]
         #pktdict['nwk']['srcAddr'] = pkt[i:i+n]
         baseinfo.append(reverse_hex(pkt[i:i+n]))
         i += n
@@ -211,13 +171,13 @@ def PacketParser(pkt):
         baseinfo.append(str(pkt[i] & 0x0F))
         i += 1
         if nwkfcd.routeInd:
-            routeinfo = _NwkRouteInfo.from_buffer(pkt[i:i+3])
+            routeinfo = NwkRouteInfo.from_buffer(pkt[i:i+4])
             #pktdict['nwk']['relayIdx'] = routeinfo.index
             routeaddrs = []
             i += 3
             #pktdict['nwk']['relayLst'] = []
             for ii in range(routeinfo.number):
-                n = _AddrLen[getattr(routeinfo, 'addrMode%i' % ii)]
+                n = AddrLen[getattr(routeinfo, 'addrMode%i' % ii)]
                 #pktdict['nwk']['relayLst'].append(pkt[i:i+n])
                 routeaddrs.append(reverse_hex(pkt[i:i+n]))
                 i += n
@@ -227,124 +187,66 @@ def PacketParser(pkt):
                 
         if nwkfcd.FTD == 1:
             # command.
-            cmdinfo[0]['cmdInfo'] = 'nCmd'
+            baseinfo[0] = nwk_ctype.get(pkt[i], 'ncReserve')
             if pkt[i] == 1:
                 # joinNwkReq
-                cmdinfo[0]['cmdType'] = 'joinNwkReq'
                 i += 1
-                cmdinfo[1]['cmdOpt'] = '%02X'%pkt[i]
+                cmdinfo['cmdOpt'] = '%02X'%pkt[i]
             elif pkt[i] == 2:
                 # joinNwkResp
-                cmdinfo[0]['cmdType'] = 'joinNwkResp'
                 i += 1
-                cmdinfo[1]['cmdOpt'] = '%02X'%pkt[i]
-                i += 1
-                cmdinfo[1]['panId'] = reverse_hex(pkt[i:i+2])
-                i += 2
-                cmdinfo[1]['cnAddr'] = reverse_hex(pkt[i:i+n])
-                i += 6
-                tslotlv = TimeslotLevel.from_buffer(pkt[i:i+2])
-                cmdinfo[1]['timeSlot'] = str(tslotlv.timeSlot)
-                cmdinfo[1]['level'] = str(tslotlv.level)
-                i += 2
-                cmdinfo[1]['rssi'] = str(pkt[i])
-                i += 1
-                n = pkt[i]
-                cmdinfo[1]['relayNum'] = str(pkt[i])
-                i += 1
-                relays = []
-                for ii in range(n):
-                    relays.append(reverse_hex(pkt[i:i+2]))
-                    i += 2
-                cmdinfo[1]['relays'] = '-'.join(relays)
+                cmdinfo = nwk_join_nwk_resp(pkt[i:])
             elif pkt[i] == 3:
                 # routeErr
-                cmdinfo[0]['cmdType'] = 'routeErr'
                 i += 1
-                cmdinfo[1]['errCode'] = 'noResp' if pkt[i] == 1 else '--'
+                cmdinfo['errCode'] = 'noResp' if pkt[i] == 1 else '--'
                 i += 1
-                n = _AddrLen[nwkfcd.dstAddrMode]
-                cmdinfo[1]['failAddr'] = reverse_hex(pkt[i:i+n])
+                n = AddrLen[nwkfcd.dstAddrMode]
+                cmdinfo['failAddr'] = reverse_hex(pkt[i:i+n])
             elif pkt[i] == 0x10:
                 # fiGatherCmd
-                cmdinfo[0]['cmdType'] = 'fiGatherCmd'
                 i += 1
-                cmdinfo[1]['pgIdx'] = str(pkt[i] & 0x0F)
+                cmdinfo['pgIdx'] = str(pkt[i] & 0x0F)
             elif pkt[i] == 0x11:
                 # fiGatherResp
                 i += 1
-                cmdinfo[0]['cmdType'] = 'fiGatherResp'
-                cmdinfo[1]['pgIdx'] = str(pkt[i] & 0x0F)
-                cmdinfo[1]['totPg'] = str(pkt[i] >> 4)
+                cmdinfo['pgIdx'] = str(pkt[i] & 0x0F)
+                cmdinfo['totPg'] = str(pkt[i] >> 4)
                 i += 1
                 n = pkt[i]
                 neighbors = []
                 for ii in range(n):
-                    neighbors.append('%s:%02X',  (reverse_hex(pkt[i:i+6]),  pkt[i+6]))
+                    neighbors.append('%s:%02X' % (reverse_hex(pkt[i:i+6]),  pkt[i+6]))
                     i += 7
-                cmdinfo[1]['neighbors'] = '-'.join(neighbors)
+                cmdinfo['neighbors'] = '\n'.join(neighbors)
             elif pkt[i] == 0x12:
                 # cfgSn
-                cmdinfo[0]['cmdType'] = 'cfgSn'
                 i += 1
-                opt = NwkCfgSnOpt.from_buffer(pkt[i:i+1])
-                i += 1
-                cmdinfo[1]['offline'] = str(opt.offline)
-                if opt.chnlGrp:
-                    cmdinfo[1]['chnlGrp'] = str(pkt[i])
-                    i += 1
-                tslotlv = TimeslotLevel.from_buffer(pkt[i:i+2])
-                if opt.timeSlot:
-                    cmdinfo[1]['timeSlot'] = str(tslotlv.timeSlot)
-                if opt.level:
-                    cmdinfo[1]['level'] = str(tslotlv.level)
-                i += 2
-                if opt.shortAddr:
-                    cmdinfo[1]['shortAddr'] =  reverse_hex(pkt[i:i+2])
-                    i += 2
-                if opt.panId:
-                    cmdinfo[1]['panId'] =  reverse_hex(pkt[i:i+2])
-                    i += 2
-                if opt.relayLst:
-                    n = pkt[i]
-                    cmdinfo[1]['relayNum'] = str(n)
-                    i += 1
-                    relayLst = []
-                    for ii in range(n):
-                        nn = pkt[i]
-                        i += 1
-                        relays = []
-                        for iii in range(nn):
-                            relays.append(reverse_hex(pkt[i:i+2]))
-                            i += 2
-                        relayLst.append('-'.join(relays))
-                    cmdinfo[1]['relayLst'] = ','.join(relayLst) 
+                cmdinfo = nwk_cfg_sn(pkt[i:])
             elif pkt[i] == 0x13:
                 # cfgSnResp
-                cmdinfo[0]['cmdType'] = 'cfgSnResp'
                 i += 1
-                cmdinfo[1]['cmdOpt'] = str(pkt[i])
+                cmdinfo['cmdOpt'] = str(pkt[i])
                 i += 1
-                cmdinfo[1]['hVer'] =  pkt[i:i+2].hex().upper()
+                cmdinfo['hVer'] =  pkt[i:i+2].hex().upper()
                 i += 2
-                cmdinfo[1]['sVer'] =  pkt[i:i+3].hex().upper()
+                cmdinfo['sVer'] =  pkt[i:i+3].hex().upper()
             elif pkt[i] == 0x16:
                 # fNdRdy
-                cmdinfo[0]['cmdType'] = 'fNdRdy'
                 i += 1
-                cmdinfo[1]['cmdOpt'] = str(pkt[i])
+                cmdinfo['cmdOpt'] = str(pkt[i])
                 i += 1
                 tslotlv = TimeslotLevel.from_buffer(pkt[i:i+2])
-                cmdinfo[1]['timeSlot'] = str(tslotlv.timeSlot)
-                cmdinfo[1]['level'] =str( tslotlv.level)
+                cmdinfo['timeSlot'] = str(tslotlv.timeSlot)
+                cmdinfo['level'] =str( tslotlv.level)
         elif nwkfcd.FTD == 0:
             # data.
             # parse aps.
-            apsfcd = _ApsFCD.from_buffer(pkt[i:i+1])
+            apsfcd = ApsFCD.from_buffer(pkt[i:i+1])
             i += 1
             #pktdict['aps'] = {'frmType': apsfcd.FTD, 'frmIdx': pkt[i]}
-            baseinfo.append(_ApsFrmType[apsfcd.FTD])
-            baseinfo.append(str(pkt[i]))
+            baseinfo[0] = aps_ftype[apsfcd.FTD]
+            i += 1
             if apsfcd.OEI:
                 extlen = pkt[i]
                 i += 1
@@ -353,154 +255,279 @@ def PacketParser(pkt):
                 #pktdict['aps']['extData'] = pkt[i:i+extlen]
                 i += extlen
             #pktdict['aps']['DUI'] = pkt[i]
-            baseinfo.append(str(pkt[i]))
+            #baseinfo.append(str(pkt[i]))
             if apsfcd.FTD == 0:
                 # ack/nack.
-                cmdinfo[0]['cmdInfo'] = 'aAckNack'
-                cmdinfo[0]['cmdType'] = 'ack' if pkt[i] else 'nack'
+                baseinfo.append('Ack' if pkt[i] else 'Nack')
+                pass
             elif apsfcd.FTD == 1:
                 # command.
-                cmdinfo[0]['cmdInfo'] = 'aCmd'
+                baseinfo[0] = aps_ctype.get(pkt[i], 'acReserve')
+                baseinfo.append(baseinfo[0])
                 if pkt[i] == 0:
-                    cmdinfo[0]['cmdType'] = 'cfgUart'
+                    # cfgUart
                     i += 1
-                    if pkt[i] > 5:
-                        cmdinfo[1]['baudrate'] = '--'
+                    if pkt[i] > len(aps_baudrate):
+                        cmdinfo['baudrate'] = '--'
                     else:
-                        cmdinfo[1]['baudrate'] = ApsBaudrate[pkt[i]]
+                        cmdinfo['baudrate'] = aps_baudrate[pkt[i]]
+                        
                     i += 1
                     if pkt[i] == 0:
-                        cmdinfo[1]['parity'] = 'none'
+                        cmdinfo['parity'] = 'none'
                     elif pkt[i] == 1:
-                        cmdinfo[1]['parity'] = 'odd'
+                        cmdinfo['parity'] = 'odd'
                     elif pkt[i] == 2:
-                        cmdinfo[1]['parity'] = 'even'
+                        cmdinfo['parity'] = 'even'
                     else:
-                        cmdinfo[1]['parity'] = 'invalid'
+                        cmdinfo['parity'] = 'invalid'
                 if pkt[i] == 1:
-                    cmdinfo[0]['cmdType'] = 'setChnlGrp'
+                    # setChnlGrp
                     i += 1
-                    cmdinfo[1]['chnlGrp'] = str(pkt[i])
+                    cmdinfo['chnlGrp'] = str(pkt[i])
                 if pkt[i] == 2:
-                    cmdinfo[0]['cmdType'] = 'setRssi'
+                    # setRssi
                     i += 1
-                    cmdinfo[1]['rssi'] = str(pkt[i])
+                    cmdinfo['rssi'] = str(pkt[i])
                 if pkt[i] == 3:
-                    cmdinfo[0]['cmdType'] = 'setTsmtPower'
+                    # setTsmtPower
                     i += 1
-                    cmdinfo[1]['tsmtPower'] = ApsTsmtPower.get(pkt[i], '--')
+                    cmdinfo['tsmtPower'] = ApsTsmtPower.get(pkt[i], '--')
                 if pkt[i] == 4:
-                    cmdinfo[0]['cmdType'] = 'rdNodeCfg'
+                    # rdNodeCfg
                     i += 1
-                    cmdinfo[1]['factoryAddr'] = reverse_hex(pkt[i:i+6])
-                    i += 6
-                    cmdinfo[1]['nodeType'] = str(pkt[i])
-                    i += 1
-                    cmdinfo[1]['panId'] = reverse_hex(pkt[i:i+2])
-                    i += 2
-                    cmdinfo[1]['shortAddr'] = reverse_hex(pkt[i:i+2])
-                    i += 2
-                    cmdinfo[1]['vendId'] = reverse_hex(pkt[i:i+2])
-                    i += 2
-                    cmdinfo[1]['hVer'] = reverse_hex(pkt[i:i+2])
-                    i += 2
-                    cmdinfo[1]['sVer'] = reverse_hex(pkt[i:i+3])
-                    i += 3
-                    cmdinfo[1]['tsmtPower'] = ApsTsmtPower.get(pkt[i], '--')
-                    i += 1
-                    cmdinfo[1]['rssi'] = str(pkt[i])
-                    i += 1
-                    cmdinfo[1]['chnlGrp'] = str(pkt[i])
-                    i += 1
-                    tslotlv = TimeslotLevel.from_buffer(pkt[i:i+2])
-                    cmdinfo[1]['timeSlot'] = str(tslotlv.timeSlot)
-                    cmdinfo[1]['level'] = str(tslotlv.level)
-                    i += 2
-                    cmdinfo[1]['nwkCapacity'] = str(int.from_bytes(pkt[i:i+2], 'little'))
-                    i += 2
-                    n = pkt[i]
-                    cmdinfo[1]['relayNum'] = str(n)
-                    i += 1
-                    relayLst = []
-                    for ii in range(n):
-                        nn = pkt[i]
-                        i += 1
-                        relays = []
-                        for iii in range(nn):
-                            relays.append(reverse_hex(pkt[i:i+2]))
-                            i += 2
-                        relayLst.append('-'.join(relays))
-                    cmdinfo[1]['relayLst'] = ','.join(relayLst) 
+                    cmdinfo = aps_read_node_config(pkt[1:])
                 if pkt[i] == 5:
-                    cmdinfo[0]['cmdType'] = 'devReboot'
+                    # devReboot
+                    pass
                 if pkt[i] == 6:
-                    cmdinfo[0]['cmdType'] = 'softUpgrade'
+                    # softUpgrade
                     i += 1
-                    cmdinfo[0]['vendId'] = pkt[i:i+2].hex().upper()
+                    cmdinfo['vendId'] = pkt[i:i+2].hex().upper()
                     i += 2
-                    cmdinfo[0]['devType'] = str(pkt[i])
+                    cmdinfo['devType'] = str(pkt[i])
                     i += 1
-                    cmdinfo[1]['totPkt'] = str(int.from_bytes(pkt[i:i+2], 'little'))
+                    cmdinfo['totPkt'] = str(int.from_bytes(pkt[i:i+2], 'little'))
                     i += 2
-                    cmdinfo[1]['curPkt'] = str(int.from_bytes(pkt[i:i+2], 'little'))
+                    cmdinfo['curPkt'] = str(int.from_bytes(pkt[i:i+2], 'little'))
                 if pkt[i] == 7:
-                    cmdinfo[0]['cmdType'] = 'bcastTiming'
+                    # bcastTiming
                     i += 1
-                    cmdinfo[1]['bcastFrmIdx'] = str(pkt[i])
+                    cmdinfo['bcastFrmIdx'] = str(pkt[i])
                     i += 1
                     tslotlv = TimeslotLevel.from_buffer(pkt[i:i+2])
-                    cmdinfo[1]['timeSlot'] = str(tslotlv.timeSlot)
-                    cmdinfo[1]['level'] = str(tslotlv.level)
+                    cmdinfo['timeSlot'] = str(tslotlv.timeSlot)
+                    cmdinfo['level'] = str(tslotlv.level)
                     i += 2
-                    cmdinfo[1]['maxDly'] = str(int.from_bytes(pkt[i:i+4], 'little'))
+                    cmdinfo['maxDly'] = str(int.from_bytes(pkt[i:i+4], 'little'))
             elif apsfcd.FTD == 2:
                 # data route.
-                cmdinfo[0]['cmdInfo'] = 'aRoute'
-                if pkt[i] > 5:
-                    cmdinfo[1]['baudrate'] = '--'
+                # aRoute
+                if pkt[i] > len(aps_baudrate):
+                    cmdinfo['baudrate'] = '--'
                 else:
-                    cmdinfo[1]['baudrate'] = ApsBaudrate[pkt[i]]
+                    cmdinfo['baudrate'] = aps_baudrate[pkt[i]]
+                baseinfo.append(cmdinfo['baudrate'])
+                i += 1
+                cmdinfo['data'] = ' '.join('%02X'%ii for ii in pkt[i:])
             elif apsfcd.FTD == 3:
                 # report.
-                cmdinfo[0]['cmdInfo'] = 'aReport'
+                # aReport
                 if pkt[i] == 0:
-                    cmdinfo[1]['reportType'] = 'evtReprot'
+                    cmdinfo['reportType'] = 'evtReprot'
                     i += 1
                     if pkt[i] == 0:
-                        cmdinfo[1]['reportInfo'] = 'meterEvt'
+                        cmdinfo['reportInfo'] = 'meterEvt'
                     elif pkt[i] == 1:
-                        cmdinfo[1]['reportInfo'] = 'snEvt'
+                        cmdinfo['reportInfo'] = 'snEvt'
                     else:
-                        cmdinfo[1]['reportInfo'] = '--'
+                        cmdinfo['reportInfo'] = '--'
                 else:
-                    cmdinfo[1]['reportType'] = '--'
+                    cmdinfo['reportType'] = '--'
+                baseinfo.append(cmdinfo['reportType'])
+            else:
+                baseinfo.append(str(pkt[i]))
     #return pktdict
     return baseinfo, cmdinfo
     
 
-def parse_beacon(pkt):
+def mac_beacon(p):
     i = 0
-    cmdinfo = {}
-    cmdinfo['tsmtRndDly'] = str(pkt[i])
+    info = {}
+    info['tsmtRndDly'] = str(p[i])
     i += 1
-    cmdinfo['beaconRound'] = str(pkt[i])
+    info['beaconRound'] = str(p[i])
     i += 1
-    tslotlv = TimeslotLevel.from_buffer(pkt[i:i+2])
-    cmdinfo['timeSlot'] = str(tslotlv.timeSlot)
-    cmdinfo['level'] = str(tslotlv.level)
+    tslotlv = TimeslotLevel.from_buffer(p[i:i+2])
+    info['timeSlot'] = str(tslotlv.timeSlot)
+    info['level'] = str(tslotlv.level)
     i += 2
-    cmdinfo['beaconInd'] = str(pkt[i])
+    info['beaconInd'] = str(p[i])
     i += 1
-    cmdinfo['nwkCapacity'] =  str(int.from_bytes(pkt[i:i+2], 'little'))
+    info['nwkCapacity'] =  str(int.from_bytes(p[i:i+2], 'little'))
     i += 2
-    cmdinfo['fiThreshold'] = str(pkt[i])
+    info['fiThreshold'] = str(p[i])
     i += 1
-    cmdinfo['cnPanId'] =  reverse_hex(pkt[i:i+2])
+    info['cnPanId'] =  reverse_hex(p[i:i+2])
     i += 2
-    cmdinfo['cnAddr'] = reverse_hex(pkt[i:i+6])
-    #i += 6
-    return cmdinfo
+    info['cnAddr'] = reverse_hex(p[i:i+6])
+    return info
+    
+def nwk_nwk_maintain_req(p):
+    i = 0
+    info = {}
+    pathn = p[i] & 0x0F
+    info['pathNodeNum'] = str(pathn)
+    info['pathIdx'] = str(p[i] >> 4)
+    i += 1
+    # len(p) = 1+x*pathn+pathn-1
+    # x = len(p)/pathn - 1
+    n = len(p)//pathn - 1
+    routers = []
+    fipowers = []
+    for ii in range(pathn):
+        routers.append(reverse_hex(p[i:i+n]))
+        i += n
+    for ii in range(pathn-1):
+        fipowers.append(str(p[i]))
+        i += 1
+    info['routers'] = '\n'.join(routers)
+    info['fiPowers'] = '-'.join(fipowers)
+    return info
 
+def nwk_nwk_maintain_resp(p):
+    i = 0
+    info = {}
+    pathn = p[i] & 0x0F
+    info['pathNodeNum'] = str(pathn)
+    info['pathIdx'] = str(p[i] >> 4)
+    i += 1
+    # len(p) = 1+x*pathn+2*pathn-2
+    # x = (len(p) + 1)/pathn - 2
+    n = (len(p) + 1)//pathn - 2
+    routers = []
+    fiDnpowers = []
+    fiUpPowers = []
+    for ii in range(pathn):
+        routers.append(reverse_hex(p[i:i+n]))
+        i += n
+    for ii in range(pathn-1):
+        fiDnpowers.append(str(p[i]))
+        i += 1
+    for ii in range(pathn-1):
+        fiUpPowers.append(str(p[i]))
+        i += 1
+    info['routers'] = '\n'.join(routers)
+    info['fiDnPowers'] = '-'.join(fiDnpowers)
+    info['fiUpPowers'] = '-'.join(fiUpPowers)
+    return info
+    
+def nwk_join_nwk_resp(p):
+    i = 0
+    info = {}
+    info['cmdOpt'] = '%02X'%p[i]
+    i += 1
+    info['panId'] = reverse_hex(p[i:i+2])
+    i += 2
+    info['cnAddr'] = reverse_hex(p[i:i+6])
+    i += 6
+    tslotlv = TimeslotLevel.from_buffer(p[i:i+2])
+    info['timeSlot'] = str(tslotlv.timeSlot)
+    info['level'] = str(tslotlv.level)
+    i += 2
+    info['rssi'] = str(p[i])
+    i += 1
+    n = p[i]
+    info['relayNum'] = str(p[i])
+    i += 1
+    relays = []
+    for ii in range(n):
+        relays.append(reverse_hex(p[i:i+2]))
+        i += 2
+    info['relays'] = '-'.join(relays)
+    return info
+    
+def nwk_cfg_sn(p):
+    i = 0
+    info = {}
+    opt = NwkCfgSnOpt.from_buffer(p[i:i+1])
+    i += 1
+    info['offline'] = str(opt.offline)
+    if opt.chnlGrp:
+        info['chnlGrp'] = str(p[i])
+        i += 1
+    tslotlv = TimeslotLevel.from_buffer(p[i:i+2])
+    if opt.timeSlot:
+        info['timeSlot'] = str(tslotlv.timeSlot)
+    if opt.level:
+        info['level'] = str(tslotlv.level)
+    i += 2
+    if opt.shortAddr:
+        info['shortAddr'] =  reverse_hex(p[i:i+2])
+        i += 2
+    if opt.panId:
+        info['panId'] =  reverse_hex(p[i:i+2])
+        i += 2
+    if opt.relayLst:
+        n = p[i]
+        info['relayNum'] = str(n)
+        i += 1
+        relayLst = []
+        for ii in range(n):
+            nn = p[i]
+            i += 1
+            relays = []
+            for iii in range(nn):
+                relays.append(reverse_hex(p[i:i+2]))
+                i += 2
+            relayLst.append('-'.join(relays))
+        info['relayLst'] = ','.join(relayLst) 
+    return info
+    
+def aps_read_node_config(p):
+    i = 0
+    info = {}
+    info['factoryAddr'] = reverse_hex(p[i:i+6])
+    i += 6
+    info['nodeType'] = str(p[i])
+    i += 1
+    info['panId'] = reverse_hex(p[i:i+2])
+    i += 2
+    info['shortAddr'] = reverse_hex(p[i:i+2])
+    i += 2
+    info['vendId'] = reverse_hex(p[i:i+2])
+    i += 2
+    info['hVer'] = reverse_hex(p[i:i+2])
+    i += 2
+    info['sVer'] = reverse_hex(p[i:i+3])
+    i += 3
+    info['tsmtPower'] = ApsTsmtPower.get(p[i], '--')
+    i += 1
+    info['rssi'] = str(p[i])
+    i += 1
+    info['chnlGrp'] = str(p[i])
+    i += 1
+    tslotlv = TimeslotLevel.from_buffer(p[i:i+2])
+    info['timeSlot'] = str(tslotlv.timeSlot)
+    info['level'] = str(tslotlv.level)
+    i += 2
+    info['nwkCapacity'] = str(int.from_bytes(p[i:i+2], 'little'))
+    i += 2
+    n = p[i]
+    info['relayNum'] = str(n)
+    i += 1
+    relayLst = []
+    for ii in range(n):
+        nn = p[i]
+        i += 1
+        relays = []
+        for iii in range(nn):
+            relays.append(reverse_hex(p[i:i+2]))
+            i += 2
+        relayLst.append('-'.join(relays))
+    info['relayLst'] = ','.join(relayLst) 
+    return info
+    
     
 if __name__ == '__main__':
     d = bytearray.fromhex(

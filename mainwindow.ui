@@ -37,7 +37,7 @@
        </column>
        <column>
         <property name="text">
-         <string>fType</string>
+         <string>mFType</string>
         </property>
        </column>
        <column>
@@ -52,32 +52,27 @@
        </column>
        <column>
         <property name="text">
-         <string>PID</string>
+         <string>pid</string>
         </property>
        </column>
        <column>
         <property name="text">
-         <string>dst</string>
+         <string>mDst</string>
         </property>
        </column>
        <column>
         <property name="text">
-         <string>src</string>
+         <string>mSrc</string>
         </property>
        </column>
        <column>
         <property name="text">
-         <string>fType</string>
+         <string>nDst</string>
         </property>
        </column>
        <column>
         <property name="text">
-         <string>dst</string>
-        </property>
-       </column>
-       <column>
-        <property name="text">
-         <string>src</string>
+         <string>nSrc</string>
         </property>
        </column>
        <column>
@@ -87,7 +82,7 @@
        </column>
        <column>
         <property name="text">
-         <string>R</string>
+         <string>r</string>
         </property>
        </column>
        <column>
@@ -97,12 +92,7 @@
        </column>
        <column>
         <property name="text">
-         <string>fType</string>
-        </property>
-       </column>
-       <column>
-        <property name="text">
-         <string>DUI</string>
+         <string>aDUI</string>
         </property>
        </column>
       </widget>
