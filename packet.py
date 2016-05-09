@@ -214,6 +214,7 @@ def PacketParser(pkt):
                 cmdinfo['totPg'] = str(pkt[i] >> 4)
                 i += 1
                 n = pkt[i]
+                i += 1
                 neighbors = []
                 for ii in range(n):
                     neighbors.append('%s:%02X' % (reverse_hex(pkt[i:i+6]),  pkt[i+6]))
@@ -327,7 +328,7 @@ def PacketParser(pkt):
                     cmdinfo['baudrate'] = '--'
                 else:
                     cmdinfo['baudrate'] = aps_baudrate[pkt[i]]
-                baseinfo.append(cmdinfo['baudrate'])
+                baseinfo.append('baud' + cmdinfo['baudrate'])
                 i += 1
                 cmdinfo['data'] = ' '.join('%02X'%ii for ii in pkt[i:])
             elif apsfcd.FTD == 3:

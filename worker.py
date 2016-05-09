@@ -17,8 +17,8 @@ testdata = [
 ]
 
 
-def worker(conn):
-    ser = serial.Serial('COM12',  115200, parity=serial.PARITY_EVEN, timeout=0)
+def worker(conn, port):
+    ser = serial.Serial(port,  115200, parity=serial.PARITY_EVEN, timeout=0)
     buf = bytearray()
     
     while True:
@@ -30,7 +30,9 @@ def worker(conn):
             if i != -1:
                 if len(buf) >= i + buf[4] + 7:
                     t = datetime.now().strftime('%H:%M:%S %f')
-                    conn.send([t, PacketParser(buf[i+8: i+buf[4]+7]), ' '.join('%02X'%ii for ii in buf[i+8: i+buf[4]+7])])
+                    baseinfo, extinfo = PacketParser(buf[i+8: i+buf[4]+7])
+                    baseinfo.insert(0, str(t))
+                    conn.send([baseinfo, extinfo, ' '.join('%02X'%ii for ii in buf[i+8: i+buf[4]+7])])
                     del buf[: i+buf[4]+7]
             else:
                 i = buf.find(b'\xFE')

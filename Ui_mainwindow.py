@@ -20,6 +20,7 @@ class Ui_MainWindow(object):
         self.splitter.setOrientation(QtCore.Qt.Vertical)
         self.splitter.setObjectName("splitter")
         self.treeWidget = QtWidgets.QTreeWidget(self.splitter)
+        self.treeWidget.setContextMenuPolicy(QtCore.Qt.ActionsContextMenu)
         self.treeWidget.setIndentation(0)
         self.treeWidget.setUniformRowHeights(False)
         self.treeWidget.setHeaderHidden(False)
@@ -52,6 +53,10 @@ class Ui_MainWindow(object):
         self.horizontalLayout.setStretch(0, 5)
         self.horizontalLayout.setStretch(1, 1)
         MainWindow.setCentralWidget(self.centralWidget)
+        self.actionSaveAs = QtWidgets.QAction(MainWindow)
+        self.actionSaveAs.setObjectName("actionSaveAs")
+        self.actionLoad = QtWidgets.QAction(MainWindow)
+        self.actionLoad.setObjectName("actionLoad")
 
         self.retranslateUi(MainWindow)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
@@ -74,6 +79,8 @@ class Ui_MainWindow(object):
         self.treeWidget.headerItem().setText(12, _translate("MainWindow", "aDUI"))
         self.treeWidget_cmdinfo.headerItem().setText(0, _translate("MainWindow", "key"))
         self.treeWidget_cmdinfo.headerItem().setText(1, _translate("MainWindow", "value"))
+        self.actionSaveAs.setText(_translate("MainWindow", "SaveAs"))
+        self.actionLoad.setText(_translate("MainWindow", "Load"))
 
 
 if __name__ == "__main__":
