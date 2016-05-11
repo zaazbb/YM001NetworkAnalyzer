@@ -229,9 +229,9 @@ def PacketParser(pkt):
                 i += 1
                 cmdinfo['cmdOpt'] = str(pkt[i])
                 i += 1
-                cmdinfo['hVer'] =  pkt[i:i+2].hex().upper()
+                cmdinfo['hVer'] =  reverse_hex(pkt[i:i+2])
                 i += 2
-                cmdinfo['sVer'] =  pkt[i:i+3].hex().upper()
+                cmdinfo['sVer'] =   reverse_hex(pkt[i:i+3])
             elif pkt[i] == 0x16:
                 # fNdRdy
                 i += 1
@@ -263,8 +263,7 @@ def PacketParser(pkt):
                 pass
             elif apsfcd.FTD == 1:
                 # command.
-                baseinfo[0] = aps_ctype.get(pkt[i], 'acReserve')
-                baseinfo.append(baseinfo[0])
+                baseinfo[0] = aps_ctype[pkt[i]] if pkt[i] < len(aps_ctype) else 'acReserve'
                 if pkt[i] == 0:
                     # cfgUart
                     i += 1
@@ -282,26 +281,30 @@ def PacketParser(pkt):
                         cmdinfo['parity'] = 'even'
                     else:
                         cmdinfo['parity'] = 'invalid'
-                if pkt[i] == 1:
+                elif pkt[i] == 1:
                     # setChnlGrp
                     i += 1
                     cmdinfo['chnlGrp'] = str(pkt[i])
-                if pkt[i] == 2:
+                elif pkt[i] == 2:
                     # setRssi
                     i += 1
                     cmdinfo['rssi'] = str(pkt[i])
-                if pkt[i] == 3:
+                elif pkt[i] == 3:
                     # setTsmtPower
                     i += 1
                     cmdinfo['tsmtPower'] = ApsTsmtPower.get(pkt[i], '--')
-                if pkt[i] == 4:
+                elif pkt[i] == 4:
                     # rdNodeCfg
                     i += 1
-                    cmdinfo = aps_read_node_config(pkt[1:])
-                if pkt[i] == 5:
+                    if i < len(pkt):
+                        cmdinfo = aps_read_node_config(pkt[i:])
+                        baseinfo[0] += 'Up'
+                    else:
+                        baseinfo[0] += 'Dn'
+                elif pkt[i] == 5:
                     # devReboot
                     pass
-                if pkt[i] == 6:
+                elif pkt[i] == 6:
                     # softUpgrade
                     i += 1
                     cmdinfo['vendId'] = pkt[i:i+2].hex().upper()
@@ -311,7 +314,7 @@ def PacketParser(pkt):
                     cmdinfo['totPkt'] = str(int.from_bytes(pkt[i:i+2], 'little'))
                     i += 2
                     cmdinfo['curPkt'] = str(int.from_bytes(pkt[i:i+2], 'little'))
-                if pkt[i] == 7:
+                elif pkt[i] == 7:
                     # bcastTiming
                     i += 1
                     cmdinfo['bcastFrmIdx'] = str(pkt[i])
@@ -321,6 +324,7 @@ def PacketParser(pkt):
                     cmdinfo['level'] = str(tslotlv.level)
                     i += 2
                     cmdinfo['maxDly'] = str(int.from_bytes(pkt[i:i+4], 'little'))
+                baseinfo.append(baseinfo[0])
             elif apsfcd.FTD == 2:
                 # data route.
                 # aRoute
@@ -457,7 +461,8 @@ def nwk_cfg_sn(p):
     if opt.chnlGrp:
         info['chnlGrp'] = str(p[i])
         i += 1
-    tslotlv = TimeslotLevel.from_buffer(p[i:i+2])
+    if opt.timeSlot or opt.level:
+        tslotlv = TimeslotLevel.from_buffer(p[i:i+2])
     if opt.timeSlot:
         info['timeSlot'] = str(tslotlv.timeSlot)
     if opt.level:

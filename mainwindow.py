@@ -14,9 +14,11 @@ from Ui_mainwindow import Ui_MainWindow
 #         'darkGreen', 'darkCyan', 'darkMagenta', 'darkYellow', 'gray','darkGray')
 highlights = (
     (1054500001, 'lightGray'), # basenode
-    (111111111111, 'red'),  #testnode
-    (222222222222, 'green'),
-    #(3103261, 'green'),
+    #(111111111111, 'red'),  #testnode
+    #(141111561911, 'red'), 
+    (10203040506, 'red'), 
+    #(222222222222, 'green'),
+    (3103261, 'green'),
     (3100063, 'cyan'), (3103045, 'magenta'), (3102133, 'yellow')
 )
 
