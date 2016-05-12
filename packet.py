@@ -82,6 +82,15 @@ ApsTsmtPower = {0:'16dBm', 1:'10dBm', 2:'4dBm', 3:'-2dBm'}
 def reverse_hex(addr):
     addr.reverse()
     return addr.hex().upper()
+    
+def bitrate(dat):
+    bits = 0
+    for b in dat:
+        for i in range(8):
+            if (b>>i) & 1:
+                bits += 1
+    return '%.2f%%' % (bits*100/(len(dat)*8))
+    
 
 def PacketParser(pkt):
 #    print(' '.join('%02X' % i for i in pkt))
@@ -148,6 +157,107 @@ def PacketParser(pkt):
             baseinfo[0] = 'mcNwkMntnResp'
             i += 1
             cmdinfo = nwk_nwk_maintain_resp(pkt[i:])
+        elif pkt[i] == 0xF0:
+            # ym upgrade.
+            #baseinfo[0] = 'mcUpgrade'
+            i += 1
+            if pkt[i] == 1:
+                baseinfo[0] = 'mcUpgRst'
+                i += 1
+                cmdinfo['vendId'] = reverse_hex(pkt[i:i+2])
+                i += 2
+                cmdinfo['resetTo'] = 'app' if pkt[i] == 2 else 'boot'
+                i += 1
+                cmdinfo['checkCode'] = ' '.join(['%02X'%i for i in pkt[i:i+16]])
+            elif pkt[i] == 0x91:
+                baseinfo[0] = 'mcUpgRstAck'
+                i += 1
+                cmdinfo['ackCode'] = '%02X' % pkt[i]
+            elif pkt[i] == 2:
+                baseinfo[0] = 'mcUpgRxm'
+                i += 1
+                cmdinfo['vendId'] = reverse_hex(pkt[i:i+2])
+                i += 2
+                cmdinfo['hVer'] = reverse_hex(pkt[i:i+2])
+                i += 2
+                cmdinfo['fileType'] = str(pkt[i])
+                i += 1
+                cmdinfo['fileLen'] = str(int.from_bytes(pkt[i:i+2], 'little'))
+                i += 2
+                cmdinfo['sVer'] = reverse_hex(pkt[i:i+2])
+                i += 2
+                cmdinfo['crc'] = reverse_hex(pkt[i:i+4])
+                i += 4
+                cmdinfo['checkCode'] = ' '.join(['%02X'%i for i in pkt[i:i+16]])
+            elif pkt[i] == 0x92:
+                baseinfo[0] = 'mcUpgRxmAck'
+                i += 1
+                cmdinfo['ackCode'] = '%02X' % pkt[i]
+            elif pkt[i] == 3:
+                baseinfo[0] = 'mcUpgTxm'
+                i += 1
+                cmdinfo['vendId'] = reverse_hex(pkt[i:i+2])
+                i += 2
+                cmdinfo['upgMode'] = 'bcast' if pkt[i] else 'unicast'
+                i += 1
+                cmdinfo['dstAddr'] = reverse_hex(pkt[i:i+6])
+                i += 6
+                cmdinfo['fileType'] = {1:'dsp', 2:'app'}.get(pkt[i], '???')
+                i += 1
+                cmdinfo['checkCode'] = ' '.join(['%02X'%i for i in pkt[i:i+16]])
+            elif pkt[i] == 0x93:
+                baseinfo[0] = 'mcUpgTxmAck'
+                i += 1
+                cmdinfo['ackCode'] = '%02X' % pkt[i]
+            elif pkt[i] == 4:
+                baseinfo[0] = 'mcUpgPkt'
+                i += 1
+                cmdinfo['vendId'] = reverse_hex(pkt[i:i+2])
+                i += 2
+                cmdinfo['pktNum'] = str(int.from_bytes(pkt[i:i+2], 'little'))
+                i += 2
+                cmdinfo['crc'] = reverse_hex(pkt[i:i+4])
+                i += 4
+                cmdinfo['pktIdx'] = str(int.from_bytes(pkt[i:i+2], 'little'))
+                i += 2
+                cmdinfo['pktLen'] = str(pkt[i])
+            elif pkt[i] == 0x94:
+                baseinfo[0] = 'mcUpgTxmAck'
+                i += 1
+                cmdinfo['ackCode'] = '%02X' % pkt[i]
+                i += 1
+                cmdinfo['curFrm'] = str(int.from_bytes(pkt[i:i+2], 'little'))
+            elif pkt[i] == 5:
+                baseinfo[0] = 'mcUpgSts'
+            elif pkt[i] == 0x95:
+                baseinfo[0] = 'mcUpgTxmAck'
+                i += 1
+                cmdinfo['vendId'] = reverse_hex(pkt[i:i+2])
+                i += 2
+                cmdinfo['hVer'] = reverse_hex(pkt[i:i+2])
+                i += 2
+                cmdinfo['dspVer'] = reverse_hex(pkt[i:i+2])
+                i += 2
+                cmdinfo['appVer'] = reverse_hex(pkt[i:i+2])
+                i += 2
+                cmdinfo['devSn'] = ' '.join(['%02X'%i for i in pkt[i:i+8]])
+                i += 8
+                cmdinfo['lAddr'] = reverse_hex(pkt[i:i+6])
+                i += 6
+                cmdinfo['sAddr'] = reverse_hex(pkt[i:i+2])
+                i += 2
+                cmdinfo['panId'] = reverse_hex(pkt[i:i+2])
+                i += 2
+                cmdinfo['runMode'] = '%02X' % pkt[i]
+            elif pkt[i] == 6:
+                baseinfo[0] = 'mcUpgBpSts'
+            elif pkt[i] == 0x96:
+                baseinfo[0] = 'mcUpgBpStsAck'
+                i += 1
+                cmdinfo['bpRate'] = bitrate(pkt[i:i+64])
+                cmdinfo['bpFlag'] = pkt[i:i+64].hex().upper()
+            else:
+                baseinfo[0] = 'mcUpg???'
         else:
             baseinfo[0] = 'mcReserve'
     elif macfcd.FTD == 1:

@@ -2,10 +2,11 @@
 import os.path
 import pickle
 from datetime import datetime
+import traceback
 
-from PyQt5.QtWidgets import QMainWindow, QTreeWidgetItem, QFileDialog
-from PyQt5.QtGui import QBrush
-from PyQt5.QtCore import QTimer, pyqtSlot, Qt
+from PyQt5.QtWidgets import QMainWindow, QTreeWidgetItem, QMenu, QFileDialog, QInputDialog
+from PyQt5.QtGui import QBrush, QCursor
+from PyQt5.QtCore import QTimer, pyqtSlot, Qt, QPoint
 
 from Ui_mainwindow import Ui_MainWindow
 
@@ -37,6 +38,7 @@ class MainWindow(QMainWindow):
             self.highlights['%012i' % i[0]] = getattr(Qt, i[1])
         
         self.buf = []
+        self.conn = None
         if conn_file:
             if isinstance(conn_file, str):
                 if os.path.exists(conn_file):
@@ -45,10 +47,9 @@ class MainWindow(QMainWindow):
                 self.conn = conn_file
                 self.timer = QTimer(self)
                 self.timer.timeout.connect(self.update)
-                self.timer.start(100)                
-        else:
-            self.ui.treeWidget.addAction(self.ui.actionLoad)
-        self.ui.treeWidget.addAction(self.ui.actionSaveAs)
+                self.timer.start(100)      
+    
+        self.cur_addr = ''
         
     def load_file(self, file):
         with open(file, 'rb') as f:
@@ -93,6 +94,29 @@ class MainWindow(QMainWindow):
     @pyqtSlot(QTreeWidgetItem, int)
     def on_treeWidget_cmdinfo_itemClicked(self, item, column):
         self.ui.plainTextEdit_cinfoval.setPlainText(item.text(1))
+ 
+    @pyqtSlot(QPoint)
+    def on_treeWidget_customContextMenuRequested(self, pos):
+        popMenu =QMenu(self)
+        
+        popMenu.addAction(self.ui.actionSaveAs)
+        popMenu.addAction(self.ui.actionLoad)
+
+        if self.conn:
+            popMenu.addSeparator()
+            popMenu.addAction(self.ui.actionRdSnCfg)
+            popMenu.addSeparator()
+            popMenu.addAction(self.ui.actionUpgBpSts)
+            popMenu.addAction(self.ui.actionUpgTxm)  
+            
+            col = self.ui.treeWidget.columnAt(pos.x())
+            #item = self.ui.treeWidget.itemAt(pos.x())
+            items=self.ui.treeWidget.selectedItems()            
+            if 5<=col<=8 and items:
+                self.cur_addr = items[0].text(col)
+            else:
+                self.cur_addr = ''
+        popMenu.popup(QCursor.pos())
         
     @pyqtSlot()
     def on_actionSaveAs_triggered(self):
@@ -107,3 +131,36 @@ class MainWindow(QMainWindow):
         file = QFileDialog.getOpenFileName(self, 'Load file', filter='data file(*.dat)')[0]
         if file:
             self.load_file(file)
+            
+    def send_pkt(self, template):
+        addr = self.cur_addr
+        if not addr:
+            addr, ok = QInputDialog.getText(self, 'Input Addr', 'address:')
+            if not ok or not addr:
+                return
+        try:
+            addr = bytearray.fromhex(addr.replace(' ', '')[:12].zfill(12))
+            addr.reverse()
+            pkt = bytearray.fromhex(template.replace('xx xx xx xx xx xx', ' '.join(['%02X'%i for i in addr])))
+            self.conn.send(pkt)
+            self.ui.plainTextEdit_log.appendPlainText('Tx:'+' '.join(['%02X'%i for i in pkt]))
+        except ValueError:
+            self.ui.plainTextEdit_log.appendPlainText(traceback.format_exc())
+            
+    @pyqtSlot()
+    def on_actionRdSnCfg_triggered(self):
+        self.send_pkt(
+            '41 CD 01 FF FF xx xx xx xx xx xx 00 00 00 00 00 00 '
+            '7C xx xx xx xx xx xx 00 00 00 00 00 00 11 01 01 04')
+        
+    @pyqtSlot()
+    def on_actionUpgBpSts_triggered(self):
+        self.send_pkt('63 CD 01 FF FF xx xx xx xx xx xx FF FF FF FF FF FF F0 06')
+
+    @pyqtSlot()
+    def on_actionUpgTxm_triggered(self):
+        self.send_pkt(
+            '63 CD 01 FF FF xx xx xx xx xx xx FF FF FF FF FF FF '
+            'F0 03 01 00 01 FF FF FF FF FF FF 02 '
+            '00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00')
+

@@ -42,6 +42,15 @@ def worker(conn, port):
                     del buf[:i]
                 else:
                     del buf[:]
+        if conn.poll():
+            payload = conn.recv()
+            pkt = bytearray(b'\xFE\xFE\xFE\xFE\x00\x00\x01\x00')
+            pkt.extend(payload)
+            pkt[4] = len(payload) + 3
+            pkt[7] = pkt[4] ^ pkt[5] ^ pkt[6]
+            
+            #print(' '.join('%02X'%i for i in pkt))
+            ser.write(pkt)
 
         time.sleep(0.01)
 

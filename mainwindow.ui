@@ -22,7 +22,7 @@
       </property>
       <widget class="QTreeWidget" name="treeWidget">
        <property name="contextMenuPolicy">
-        <enum>Qt::ActionsContextMenu</enum>
+        <enum>Qt::CustomContextMenu</enum>
        </property>
        <property name="indentation">
         <number>0</number>
@@ -148,6 +148,21 @@
   <action name="actionLoad">
    <property name="text">
     <string>Load</string>
+   </property>
+  </action>
+  <action name="actionUpgBpSts">
+   <property name="text">
+    <string>upgBpSts</string>
+   </property>
+  </action>
+  <action name="actionUpgTxm">
+   <property name="text">
+    <string>upgTxm</string>
+   </property>
+  </action>
+  <action name="actionRdSnCfg">
+   <property name="text">
+    <string>rdSnCfg</string>
    </property>
   </action>
  </widget>
