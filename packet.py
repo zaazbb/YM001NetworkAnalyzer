@@ -83,13 +83,13 @@ def reverse_hex(addr):
     addr.reverse()
     return addr.hex().upper()
     
-def bitrate(dat):
+def bitrate(dat, bitn):
     bits = 0
     for b in dat:
         for i in range(8):
             if (b>>i) & 1:
                 bits += 1
-    return '%.2f%%' % (bits*100/(len(dat)*8))
+    return '%.2f%%' % (bits*100/bitn)
     
 
 def PacketParser(pkt):
@@ -254,7 +254,10 @@ def PacketParser(pkt):
             elif pkt[i] == 0x96:
                 baseinfo[0] = 'mcUpgBpStsAck'
                 i += 1
-                cmdinfo['bpRate'] = bitrate(pkt[i:i+64])
+                n = int.from_bytes(pkt[i:i+2], 'little')
+                cmdinfo['pktnum'] = str(n)
+                i += 2
+                cmdinfo['bpRate'] = bitrate(pkt[i:i+64], n)
                 cmdinfo['bpFlag'] = pkt[i:i+64].hex().upper()
             else:
                 baseinfo[0] = 'mcUpg???'

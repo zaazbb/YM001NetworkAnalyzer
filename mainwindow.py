@@ -108,6 +108,8 @@ class MainWindow(QMainWindow):
             popMenu.addSeparator()
             popMenu.addAction(self.ui.actionUpgBpSts)
             popMenu.addAction(self.ui.actionUpgTxm)  
+            popMenu.addSeparator()
+            popMenu.addAction(self.ui.actionUpgRdBack)  
             
             col = self.ui.treeWidget.columnAt(pos.x())
             #item = self.ui.treeWidget.itemAt(pos.x())
@@ -163,4 +165,8 @@ class MainWindow(QMainWindow):
             '63 CD 01 FF FF xx xx xx xx xx xx FF FF FF FF FF FF '
             'F0 03 01 00 01 FF FF FF FF FF FF 02 '
             '00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00')
+            
+    @pyqtSlot()
+    def on_actionUpgRdBack_triggered(self):
+        self.send_pkt('63 CD 01 FF FF xx xx xx xx xx xx FF FF FF FF FF FF F0 07')
 

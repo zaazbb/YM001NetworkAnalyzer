@@ -63,6 +63,8 @@ class Ui_MainWindow(object):
         self.actionUpgTxm.setObjectName("actionUpgTxm")
         self.actionRdSnCfg = QtWidgets.QAction(MainWindow)
         self.actionRdSnCfg.setObjectName("actionRdSnCfg")
+        self.actionUpgRdBack = QtWidgets.QAction(MainWindow)
+        self.actionUpgRdBack.setObjectName("actionUpgRdBack")
 
         self.retranslateUi(MainWindow)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
@@ -90,6 +92,7 @@ class Ui_MainWindow(object):
         self.actionUpgBpSts.setText(_translate("MainWindow", "upgBpSts"))
         self.actionUpgTxm.setText(_translate("MainWindow", "upgTxm"))
         self.actionRdSnCfg.setText(_translate("MainWindow", "rdSnCfg"))
+        self.actionUpgRdBack.setText(_translate("MainWindow", "upgRdBack"))
 
 
 if __name__ == "__main__":
