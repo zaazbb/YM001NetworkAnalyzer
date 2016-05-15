@@ -1,4 +1,5 @@
 
+from collections import OrderedDict
 from ctypes import Structure, c_ushort, c_ubyte, c_uint
 
 #from crcmod import predefined
@@ -111,7 +112,7 @@ def PacketParser(pkt):
     #                  'ackReq': macfcd.ackReq,
     #                  'frmVer': macfcd.frmVer}
     baseinfo = [mac_ftype[macfcd.FTD], str(macfcd.ackReq)]
-    cmdinfo = {}
+    cmdinfo = OrderedDict()
     i += 2
     if macfcd.frmIdxcompr:
         #pktdict['mac']['frmIdx'] = pkt[i]
@@ -257,7 +258,7 @@ def PacketParser(pkt):
                 n = int.from_bytes(pkt[i:i+2], 'little')
                 cmdinfo['pktnum'] = str(n)
                 i += 2
-                cmdinfo['bpRate'] = bitrate(pkt[i:i+64], n)
+                cmdinfo['upgRate'] = bitrate(pkt[i:i+64], n)
                 cmdinfo['bpFlag'] = pkt[i:i+64].hex().upper()
             else:
                 baseinfo[0] = 'mcUpg???'

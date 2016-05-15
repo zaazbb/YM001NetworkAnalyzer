@@ -14,129 +14,251 @@
    <string>MainWindow</string>
   </property>
   <widget class="QWidget" name="centralWidget">
-   <layout class="QHBoxLayout" name="horizontalLayout" stretch="5,1">
+   <layout class="QVBoxLayout" name="verticalLayout_2">
     <item>
      <widget class="QSplitter" name="splitter">
       <property name="orientation">
        <enum>Qt::Vertical</enum>
       </property>
-      <widget class="QTreeWidget" name="treeWidget">
-       <property name="contextMenuPolicy">
-        <enum>Qt::CustomContextMenu</enum>
+      <widget class="QTabWidget" name="tabWidget">
+       <property name="tabPosition">
+        <enum>QTabWidget::North</enum>
        </property>
-       <property name="indentation">
+       <property name="currentIndex">
         <number>0</number>
        </property>
-       <property name="uniformRowHeights">
-        <bool>false</bool>
-       </property>
-       <property name="headerHidden">
-        <bool>false</bool>
-       </property>
-       <column>
-        <property name="text">
-         <string>time</string>
-        </property>
-       </column>
-       <column>
-        <property name="text">
-         <string>mFType</string>
-        </property>
-       </column>
-       <column>
-        <property name="text">
-         <string>ack</string>
-        </property>
-       </column>
-       <column>
-        <property name="text">
-         <string>fIdx</string>
-        </property>
-       </column>
-       <column>
-        <property name="text">
-         <string>pid</string>
-        </property>
-       </column>
-       <column>
-        <property name="text">
-         <string>mDst</string>
-        </property>
-       </column>
-       <column>
-        <property name="text">
-         <string>mSrc</string>
-        </property>
-       </column>
-       <column>
-        <property name="text">
-         <string>nDst</string>
-        </property>
-       </column>
-       <column>
-        <property name="text">
-         <string>nSrc</string>
-        </property>
-       </column>
-       <column>
-        <property name="text">
-         <string>fIdx</string>
-        </property>
-       </column>
-       <column>
-        <property name="text">
-         <string>r</string>
-        </property>
-       </column>
-       <column>
-        <property name="text">
-         <string>routeLst</string>
-        </property>
-       </column>
-       <column>
-        <property name="text">
-         <string>aDUI</string>
-        </property>
-       </column>
+       <widget class="QWidget" name="tab">
+        <attribute name="title">
+         <string>packet</string>
+        </attribute>
+        <layout class="QHBoxLayout" name="horizontalLayout" stretch="1,0">
+         <property name="leftMargin">
+          <number>9</number>
+         </property>
+         <property name="topMargin">
+          <number>9</number>
+         </property>
+         <property name="rightMargin">
+          <number>9</number>
+         </property>
+         <property name="bottomMargin">
+          <number>9</number>
+         </property>
+         <item>
+          <widget class="QTreeWidget" name="treeWidget">
+           <property name="contextMenuPolicy">
+            <enum>Qt::CustomContextMenu</enum>
+           </property>
+           <property name="indentation">
+            <number>0</number>
+           </property>
+           <property name="uniformRowHeights">
+            <bool>false</bool>
+           </property>
+           <property name="headerHidden">
+            <bool>false</bool>
+           </property>
+           <column>
+            <property name="text">
+             <string>time</string>
+            </property>
+           </column>
+           <column>
+            <property name="text">
+             <string>mFType</string>
+            </property>
+           </column>
+           <column>
+            <property name="text">
+             <string>ack</string>
+            </property>
+           </column>
+           <column>
+            <property name="text">
+             <string>fIdx</string>
+            </property>
+           </column>
+           <column>
+            <property name="text">
+             <string>pid</string>
+            </property>
+           </column>
+           <column>
+            <property name="text">
+             <string>mDst</string>
+            </property>
+           </column>
+           <column>
+            <property name="text">
+             <string>mSrc</string>
+            </property>
+           </column>
+           <column>
+            <property name="text">
+             <string>nDst</string>
+            </property>
+           </column>
+           <column>
+            <property name="text">
+             <string>nSrc</string>
+            </property>
+           </column>
+           <column>
+            <property name="text">
+             <string>fIdx</string>
+            </property>
+           </column>
+           <column>
+            <property name="text">
+             <string>r</string>
+            </property>
+           </column>
+           <column>
+            <property name="text">
+             <string>routeLst</string>
+            </property>
+           </column>
+           <column>
+            <property name="text">
+             <string>aDUI</string>
+            </property>
+           </column>
+          </widget>
+         </item>
+         <item>
+          <layout class="QVBoxLayout" name="verticalLayout" stretch="1,0">
+           <property name="leftMargin">
+            <number>0</number>
+           </property>
+           <property name="topMargin">
+            <number>0</number>
+           </property>
+           <property name="rightMargin">
+            <number>0</number>
+           </property>
+           <property name="bottomMargin">
+            <number>0</number>
+           </property>
+           <item>
+            <widget class="QTreeWidget" name="treeWidget_cmdinfo">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="indentation">
+              <number>0</number>
+             </property>
+             <attribute name="headerVisible">
+              <bool>true</bool>
+             </attribute>
+             <column>
+              <property name="text">
+               <string>key</string>
+              </property>
+             </column>
+             <column>
+              <property name="text">
+               <string>value</string>
+              </property>
+             </column>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPlainTextEdit" name="plainTextEdit_pktdata"/>
+           </item>
+          </layout>
+         </item>
+        </layout>
+        <zorder>treeWidget</zorder>
+        <zorder></zorder>
+       </widget>
+       <widget class="QWidget" name="tab_2">
+        <attribute name="title">
+         <string>node</string>
+        </attribute>
+        <layout class="QVBoxLayout" name="verticalLayout_3" stretch="1,0">
+         <property name="leftMargin">
+          <number>9</number>
+         </property>
+         <property name="topMargin">
+          <number>9</number>
+         </property>
+         <property name="rightMargin">
+          <number>9</number>
+         </property>
+         <property name="bottomMargin">
+          <number>9</number>
+         </property>
+         <item>
+          <widget class="QTreeWidget" name="treeWidget_node">
+           <property name="contextMenuPolicy">
+            <enum>Qt::CustomContextMenu</enum>
+           </property>
+           <property name="selectionMode">
+            <enum>QAbstractItemView::ExtendedSelection</enum>
+           </property>
+           <column>
+            <property name="text">
+             <string>node</string>
+            </property>
+           </column>
+           <column>
+            <property name="text">
+             <string>sver</string>
+            </property>
+           </column>
+           <column>
+            <property name="text">
+             <string>upgRate</string>
+            </property>
+           </column>
+           <column>
+            <property name="text">
+             <string>bpFlag</string>
+            </property>
+           </column>
+          </widget>
+         </item>
+         <item>
+          <layout class="QHBoxLayout" name="horizontalLayout_2" stretch="1,0">
+           <property name="leftMargin">
+            <number>0</number>
+           </property>
+           <property name="topMargin">
+            <number>0</number>
+           </property>
+           <property name="rightMargin">
+            <number>0</number>
+           </property>
+           <property name="bottomMargin">
+            <number>0</number>
+           </property>
+           <item>
+            <widget class="QProgressBar" name="progressBar_upgrade">
+             <property name="value">
+              <number>0</number>
+             </property>
+             <property name="format">
+              <string>%v/%m</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="pushButton_upgrade">
+             <property name="text">
+              <string>upgrade</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </item>
+        </layout>
+       </widget>
       </widget>
       <widget class="QPlainTextEdit" name="plainTextEdit_log"/>
      </widget>
-    </item>
-    <item>
-     <layout class="QVBoxLayout" name="verticalLayout" stretch="4,1,2">
-      <item>
-       <widget class="QTreeWidget" name="treeWidget_cmdinfo">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="indentation">
-         <number>0</number>
-        </property>
-        <attribute name="headerVisible">
-         <bool>true</bool>
-        </attribute>
-        <column>
-         <property name="text">
-          <string>key</string>
-         </property>
-        </column>
-        <column>
-         <property name="text">
-          <string>value</string>
-         </property>
-        </column>
-       </widget>
-      </item>
-      <item>
-       <widget class="QPlainTextEdit" name="plainTextEdit_cinfoval"/>
-      </item>
-      <item>
-       <widget class="QPlainTextEdit" name="plainTextEdit_rawdata"/>
-      </item>
-     </layout>
     </item>
    </layout>
   </widget>
