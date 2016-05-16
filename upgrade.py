@@ -1,5 +1,5 @@
 
-import os.path
+#import os.path
 
 
 def mk_upg02(src, flen, sver, crc):
@@ -53,8 +53,8 @@ def mk_bpsts(dst, src):
 def get_app_code(fcb):
     with open(fcb, 'rb') as f:
         d = f.read()
-        if os.path.splitext(fcb)[1] == '.bin':
-            return d[:0xb700]
+#        if os.path.splitext(fcb)[1] == '.bin':
+#            return d[:0xb700]
         # 0 - reserve, 1 - ht8550, 3 - ht8910/ht8912.
         if d[8] != 3:
             print('fcb is not for ht8912')

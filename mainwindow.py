@@ -274,7 +274,7 @@ class MainWindow(QMainWindow):
                 self.conn.send(pkt) 
                 self.ui.plainTextEdit_log.appendPlainText('Tx:'+' '.join(['%02X'%i for i in pkt]))
                 print('Tx:'+' '.join(['%02X'%i for i in pkt]))
-                self.upgtimer.start(3000)
+                self.upgtimer.start(2000)
             elif self.upgsts == 1:
                 for i in range(self.upgidx, self.upgflen):
                     if self.upgbpflag[i] == '0':
@@ -288,13 +288,13 @@ class MainWindow(QMainWindow):
                         max = self.ui.progressBar_upgrade.maximum()
                         self.ui.progressBar_upgrade.setValue(max - self.upgbpflag.count('0'))
                         self.upgidx = i+1
-                        self.upgtimer.start(1000)
+                        self.upgtimer.start(500)
                         break
                 else:
                     if self.cfgreadbp:
                         self.upgidx = 0
                         self.upgrdbplst = list(self.node['node'].keys())
-                        self.upgtimer.start(1000)
+                        self.upgtimer.start(500)
                     else:
                         self.ui.plainTextEdit_log.appendPlainText('[upgrade]upgrade finished.')
                         print('[upgrade]upgrade finished.')
