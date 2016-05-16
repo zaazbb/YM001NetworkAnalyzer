@@ -366,7 +366,7 @@ def PacketParser(pkt):
                 extlen = pkt[i]
                 i += 1
                 #pktdict['aps']['vendId'] = pkt[i:i+2]
-                i += 2
+                #i += 2
                 #pktdict['aps']['extData'] = pkt[i:i+extlen]
                 i += extlen
             #pktdict['aps']['DUI'] = pkt[i]

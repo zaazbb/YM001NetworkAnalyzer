@@ -178,19 +178,7 @@
         <attribute name="title">
          <string>node</string>
         </attribute>
-        <layout class="QVBoxLayout" name="verticalLayout_3" stretch="1,0">
-         <property name="leftMargin">
-          <number>9</number>
-         </property>
-         <property name="topMargin">
-          <number>9</number>
-         </property>
-         <property name="rightMargin">
-          <number>9</number>
-         </property>
-         <property name="bottomMargin">
-          <number>9</number>
-         </property>
+        <layout class="QVBoxLayout" name="verticalLayout_3">
          <item>
           <widget class="QTreeWidget" name="treeWidget_node">
            <property name="contextMenuPolicy">
@@ -222,19 +210,7 @@
           </widget>
          </item>
          <item>
-          <layout class="QHBoxLayout" name="horizontalLayout_2" stretch="1,0">
-           <property name="leftMargin">
-            <number>0</number>
-           </property>
-           <property name="topMargin">
-            <number>0</number>
-           </property>
-           <property name="rightMargin">
-            <number>0</number>
-           </property>
-           <property name="bottomMargin">
-            <number>0</number>
-           </property>
+          <layout class="QHBoxLayout" name="horizontalLayout_2">
            <item>
             <widget class="QProgressBar" name="progressBar_upgrade">
              <property name="value">
@@ -242,6 +218,20 @@
              </property>
              <property name="format">
               <string>%v/%m</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QCheckBox" name="checkBox_upgauto">
+             <property name="text">
+              <string>auto</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QCheckBox" name="checkBox_usebp">
+             <property name="text">
+              <string>usebp</string>
              </property>
             </widget>
            </item>

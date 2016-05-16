@@ -71,7 +71,6 @@ class MainWindow(QMainWindow):
         
         if self.conn:
             self.upgsrcaddr = self.config['upgrade']['srcaddr'][:12].zfill(12)
-            self.cfgreadbp = self.config.getboolean('upgrade', 'readbp')
             self.upgtimer = QTimer(self)
             self.upgtimer.setSingleShot(True)
             self.upgtimer.timeout.connect(self.upgrade)
@@ -238,21 +237,21 @@ class MainWindow(QMainWindow):
         self.upgflen = self.upgdata[0x400+2]+self.upgdata[0x400+7]*0x100
         self.upgsver = int.from_bytes(self.upgdata[0x100:0x100+4], 'big')
         self.upgcrc = int.from_bytes(self.upgdata[-4:], 'big')
-        if self.cfgreadbp:
+        if self.ui.checkBox_upgauto.isChecked() or not self.ui.checkBox_usebp.isChecked():
             # 0 - change mode, 1 - send data, 3 - calc bpflag
             self.upgsts = 0
             self.upgbpflag = ['0'] * self.upgflen
             self.ui.progressBar_upgrade.setValue(0)
             self.ui.progressBar_upgrade.setMaximum(self.upgflen)
         else:
-            self.upgsts = 3
+            self.upgsts = 2
         self.upgtimer.start(100)
         
     def upgrade(self):
         if self.upgrdbplst:
             node = self.upgrdbplst[self.upgidx]
             self.ui.plainTextEdit_log.appendPlainText('[upgrade]read bpflag %s' % node)
-            print('[upgrade]read bpflag %s' % node)
+            #print('[upgrade]read bpflag %s' % node)
             self.node['node'][node]['bpFlag'] = ''
             self.node['node'][node]['item'] .setText(2, '')
             self.node['node'][node]['item'] .setText(3, '')
@@ -269,21 +268,21 @@ class MainWindow(QMainWindow):
             if self.upgsts == 0:
                 self.upgsts = 1
                 self.ui.plainTextEdit_log.appendPlainText('[upgrade]switch upgrade rxd mode.')
-                print('[upgrade]switch upgrade rxd mode.')
+                #print('[upgrade]switch upgrade rxd mode.')
                 pkt = upgrade.mk_upg02(self.upgsrcaddr, self.upgflen, self.upgsver, self.upgcrc)
                 self.conn.send(pkt) 
-                self.ui.plainTextEdit_log.appendPlainText('Tx:'+' '.join(['%02X'%i for i in pkt]))
-                print('Tx:'+' '.join(['%02X'%i for i in pkt]))
+                #self.ui.plainTextEdit_log.appendPlainText('Tx:'+' '.join(['%02X'%i for i in pkt]))
+                #print('Tx:'+' '.join(['%02X'%i for i in pkt]))
                 self.upgtimer.start(2000)
             elif self.upgsts == 1:
                 for i in range(self.upgidx, self.upgflen):
                     if self.upgbpflag[i] == '0':
-                        self.ui.plainTextEdit_log.appendPlainText('[upgrade]send packet %i.' % i)
-                        print('[upgrade]: send packet %i.' % i)
+                        #self.ui.plainTextEdit_log.appendPlainText('[upgrade]send packet %i.' % i)
+                        #print('[upgrade]: send packet %i.' % i)
                         pkt = upgrade.mk_upg04(self.upgsrcaddr, self.upgflen, self.upgcrc, i+1, self.upgdata[i*128:i*128+128])
                         self.conn.send(pkt) 
-                        self.ui.plainTextEdit_log.appendPlainText('Tx:'+' '.join(['%02X'%ii for ii in pkt]))
-                        print('Tx:'+' '.join(['%02X'%ii for ii in pkt]))
+                        #self.ui.plainTextEdit_log.appendPlainText('Tx:'+' '.join(['%02X'%ii for ii in pkt]))
+                        #print('Tx:'+' '.join(['%02X'%ii for ii in pkt]))
                         self.upgbpflag[i] = '1'
                         max = self.ui.progressBar_upgrade.maximum()
                         self.ui.progressBar_upgrade.setValue(max - self.upgbpflag.count('0'))
@@ -291,13 +290,13 @@ class MainWindow(QMainWindow):
                         self.upgtimer.start(500)
                         break
                 else:
-                    if self.cfgreadbp:
+                    if self.ui.checkBox_upgauto.isChecked():
                         self.upgidx = 0
                         self.upgrdbplst = list(self.node['node'].keys())
                         self.upgtimer.start(500)
                     else:
                         self.ui.plainTextEdit_log.appendPlainText('[upgrade]upgrade finished.')
-                        print('[upgrade]upgrade finished.')
+                        #print('[upgrade]upgrade finished.')
             else:
                 self.upgsts = 0
                 totbpflag = bytearray(b'\xFF' * 64)
@@ -313,7 +312,7 @@ class MainWindow(QMainWindow):
                     self.upgbpflag.extend(flag)
                 self.upgbpflag = self.upgbpflag[:self.upgflen]
                 self.ui.plainTextEdit_log.appendPlainText('[upgrade]totbpflag %s' % ''.join(self.upgbpflag))
-                print('[upgrade]totbpflag %s' % ''.join(self.upgbpflag))
+                #print('[upgrade]totbpflag %s' % ''.join(self.upgbpflag))
                 max = self.upgbpflag.count('0')
                 if max:
                     self.ui.progressBar_upgrade.setMaximum(max)
@@ -321,5 +320,5 @@ class MainWindow(QMainWindow):
                     self.upgtimer.start(1000)
                 else:
                     self.ui.plainTextEdit_log.appendPlainText('[upgrade]upgrade finished.')
-                    print('[upgrade]upgrade finished.')
+                    #print('[upgrade]upgrade finished.')
         
