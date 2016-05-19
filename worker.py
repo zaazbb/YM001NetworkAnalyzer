@@ -23,6 +23,8 @@ def worker(conn, port):
         #conn.send(['err', "can't open %s" % port])
         conn.send(['err', traceback.format_exc()])
     buf = bytearray()
+    #ser.write(b'\xFE\xFE\xFE\xFE\x03\x32\x01\x30')
+    #ser.write(b'\xFE\xFE\xFE\xFE\x03\x33\x01\x31')
     
     while True:
         if ser.in_waiting:
@@ -38,6 +40,7 @@ def worker(conn, port):
                     t = datetime.now().strftime('%H:%M:%S %f')
                     #print(' '.join('%02X'%ii for ii in buf[i+8: i+buf[4]+5]))
                     try:
+                        #print(buf[i:i+8])
                         pktstr = ' '.join('%02X'%ii for ii in buf[i+8: i+buf[4]+5])
                         baseinfo, extinfo = PacketParser(buf[i+8: i+buf[4]+5])
                         baseinfo.insert(0, str(t))

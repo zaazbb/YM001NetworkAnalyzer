@@ -525,20 +525,20 @@ def nwk_nwk_maintain_resp(p):
     # x = (len(p) + 1)/pathn - 2
     n = (len(p) + 1)//pathn - 2
     routers = []
-    fiDnpowers = []
-    fiUpPowers = []
+    dnRssi = []
+    upRssi = []
     for ii in range(pathn):
         routers.append(reverse_hex(p[i:i+n]))
         i += n
     for ii in range(pathn-1):
-        fiDnpowers.append(str(p[i]))
+        dnRssi.append(str(p[i]))
         i += 1
     for ii in range(pathn-1):
-        fiUpPowers.append(str(p[i]))
+        upRssi.append(str(p[i]))
         i += 1
     info['routers'] = '\n'.join(routers)
-    info['fiDnPowers'] = '-'.join(fiDnpowers)
-    info['fiUpPowers'] = '-'.join(fiUpPowers)
+    info['dnRssi'] = '-'.join(dnRssi)
+    info['upRssi'] = '-'.join(upRssi)
     return info
     
 def nwk_join_nwk_resp(p):

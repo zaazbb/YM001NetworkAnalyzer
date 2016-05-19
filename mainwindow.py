@@ -78,6 +78,8 @@ class MainWindow(QMainWindow):
             self.txtimer.setSingleShot(True)
             self.txtimer.timeout.connect(self.txpacket)
             
+        self.ui.plainTextEdit_log.keyReleaseEvent = self.keyReleaseEvent
+            
         
     def load_file(self, file):
         with open(file, 'rb') as f:
@@ -321,4 +323,21 @@ class MainWindow(QMainWindow):
                 else:
                     self.ui.plainTextEdit_log.appendPlainText('[upgrade]upgrade finished.')
                     #print('[upgrade]upgrade finished.')
-        
+    
+    def keyReleaseEvent(self, e):
+        key = e.key()
+        if key == Qt.Key_Return:
+            text = self.ui.plainTextEdit_log.toPlainText()
+            i =text.rfind('\n', 0, -1)
+            i = 0 if i == -1 else i + 1
+            cmd = text[i:-1].split(maxsplit=1)
+            if len(cmd) > 1:
+                if cmd[0] == 'send':
+                    if self.conn:
+                        try:
+                            pkt = bytes.fromhex(cmd[1])
+                            self.conn.send(pkt)
+                            self.ui.plainTextEdit_log.appendPlainText('[Tx]%s.\n' % cmd[1])
+                        except:
+                            self.ui.plainTextEdit_log.appendPlainText('[error]send data error.\n')
+
