@@ -57,12 +57,21 @@ def worker(conn, port):
                 else:
                     del buf[:]
         if conn.poll():
-            payload = conn.recv()
-            pkt = bytearray(b'\xFE\xFE\xFE\xFE\x00\x00\x01\x00')
-            pkt.extend(payload)
-            pkt[4] = len(payload) + 3
-            pkt[7] = pkt[4] ^ pkt[5] ^ pkt[6]
-            
+            msg = conn.recv()
+            if msg[0] == 'send':
+                pkt = bytearray(b'\xFE\xFE\xFE\xFE\x00\x00\x01\x00')
+                pkt.extend(msg[2])
+                pkt[4] = len(msg[2]) + 3
+                pkt[5] = msg[1]
+                pkt[7] = pkt[4] ^ pkt[5] ^ pkt[6]
+            elif msg[0] == 'parsepkt':
+                try:
+                    pktstr = ' '.join('%02X'%i for i in msg[1])
+                    baseinfo, extinfo = PacketParser(msg[1])
+                    baseinfo.insert(0, msg[0])
+                    conn.send(['pkt', baseinfo, extinfo, pktstr])
+                except:
+                    conn.send(['err', traceback.format_exc()])
             #print(' '.join('%02X'%i for i in pkt))
             try:
                 ser.write(pkt)

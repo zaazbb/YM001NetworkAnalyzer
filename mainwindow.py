@@ -54,6 +54,25 @@ class MainWindow(QMainWindow):
         self.ui.treeWidget_node.expandAll()
         for i in range(self.ui.treeWidget_node.columnCount()):
              self.ui.treeWidget_node.resizeColumnToContents(i)
+             
+        menu = QMenu(self)
+        for i in ['mBeacon', 'mAck', 
+                ['mCmd', 'mcNwkMntnReq', 'mcNwkMntnResp', 'mcSoftUpgrade'], 
+                ['nCmd', 'ncJoinNwkReq', 'ncJoinNwkResp', 'ncRouteErr', 'ncFiGather',  
+                    'ncFiGatherResp',  'ncCfgSn', 'ncCfgSnResp', 'ncFreeNdRdy'], 
+                'aAckNack',  
+                ['aCmd', 'acCfgUart', 'acSetChnlGrp', 'acSetRssi', 'acSetTsmtPower', 
+                    'acRdNdCfg', 'acDevReboot', 'acSoftUpgrade', 'acBcastTiming'], 
+                'aRoute', 
+                'aReport']:
+            if isinstance(i, str):
+                menu.addAction(i)
+            else:
+                submenu = QMenu(i[0], menu)
+                for ii in  i[1:]:
+                    submenu.addAction(ii)
+                menu.addMenu(submenu)
+        self.ui.pushButton_mkpkt.setMenu(menu)
         
         self.buf = []
         self.conn = None
@@ -63,21 +82,19 @@ class MainWindow(QMainWindow):
                     self.load_file(conn_file)
             else:
                 self.conn = conn_file
+                self.ui.pushButton_parsepkt.setEnabled(True)
+                self.ui.pushButton_upgrade.setEnabled(True)
                 self.timer = QTimer(self)
                 self.timer.timeout.connect(self.update)
                 self.timer.start(100)     
-                
-        self.ui.pushButton_upgrade.setEnabled(bool(self.conn))
-        
-        if self.conn:
-            self.upgsrcaddr = self.config['upgrade']['srcaddr'][:12].zfill(12)
-            self.upgtimer = QTimer(self)
-            self.upgtimer.setSingleShot(True)
-            self.upgtimer.timeout.connect(self.upgrade)
-            self.txtimer = QTimer(self)
-            self.txtimer.setSingleShot(True)
-            self.txtimer.timeout.connect(self.txpacket)
-            
+                self.upgsrcaddr = self.config['upgrade']['srcaddr'][:12].zfill(12)
+                self.upgtimer = QTimer(self)
+                self.upgtimer.setSingleShot(True)
+                self.upgtimer.timeout.connect(self.upgrade)
+                self.txtimer = QTimer(self)
+                self.txtimer.setSingleShot(True)
+                self.txtimer.timeout.connect(self.txpacket)
+
         self.ui.plainTextEdit_log.keyReleaseEvent = self.keyReleaseEvent
             
         
@@ -116,8 +133,16 @@ class MainWindow(QMainWindow):
         if self.conn.poll():
             msg = self.conn.recv()
             if msg[0] == 'pkt':
-                self.buf.append(msg[1:])
-                self.add_treeitem(msg[1:])
+                if msg[1][0] == 'parsepkt':
+                    if self.ui.treeWidget.topLevelItem(0).text(0) == 'parsepkt':
+                        self.ui.treeWidget.takeTopLevelItem(0)
+                    item = QTreeWidgetItem(None, msg[1])
+                    self.ui.treeWidget.insertTopLevelItem(0, item)
+                    self.ui.treeWidget.scrollToTop()
+                    self.parsepkt = msg[1:]
+                else:
+                    self.buf.append(msg[1:])
+                    self.add_treeitem(msg[1:])
                 for i in range(self.ui.treeWidget.columnCount()):
                      self.ui.treeWidget.resizeColumnToContents(i)
             elif msg[0] == 'err':
@@ -127,17 +152,21 @@ class MainWindow(QMainWindow):
     def on_treeWidget_itemClicked(self, item, column):
         index = self.ui.treeWidget.indexOfTopLevelItem(item)
         self.ui.treeWidget_cmdinfo.clear()
-        if self.buf[index][1]:
+        if index == 0 and item.text(0) == 'parsepkt':
+            pktinfo = self.parsepkt
+        else:
+            pktinfo = self.buf[index]
+        if pktinfo[1]:
             self.ui.treeWidget_cmdinfo.addTopLevelItem(QTreeWidgetItem(None, ('cmdType', item.text(1))))
             self.ui.treeWidget_cmdinfo.addTopLevelItem(QTreeWidgetItem(None, ('--', '--')))
-            for i in self.buf[index][1].items():
+            for i in pktinfo[1]:
                 self.ui.treeWidget_cmdinfo.addTopLevelItem(QTreeWidgetItem(None, i))
             self.ui.treeWidget_cmdinfo.resizeColumnToContents(0)
         # routeLsg
         if column == 11:
             self.ui.plainTextEdit_pktdata.setPlainText(item.text(column))
         else:
-            self.ui.plainTextEdit_pktdata.setPlainText(self.buf[index][2])
+            self.ui.plainTextEdit_pktdata.setPlainText(pktinfo[2])
         
     @pyqtSlot(QTreeWidgetItem, int)
     def on_treeWidget_cmdinfo_itemClicked(self, item, column):
@@ -148,6 +177,9 @@ class MainWindow(QMainWindow):
         popMenu =QMenu(self)
         popMenu.addAction(self.ui.actionSaveAs)
         popMenu.addAction(self.ui.actionLoad)
+        if self.ui.treeWidget.topLevelItem(0).text(0) == 'parsepkt':
+            popMenu.addSeparator()
+            popMenu.addAction(self.ui.actionRmParsed)
         popMenu.popup(QCursor.pos())
         
     @pyqtSlot()
@@ -163,6 +195,15 @@ class MainWindow(QMainWindow):
         file = QFileDialog.getOpenFileName(self, 'Load file', filter='data file(*.dat)')[0]
         if file:
             self.load_file(file)
+            
+    @pyqtSlot()
+    def on_actionRmParsed_triggered(self):
+        self.ui.treeWidget.takeTopLevelItem(0)
+        
+    @pyqtSlot()
+    def pushButton_parsepkt_clicked(self):
+        text = self.ui.plainTextEdit_pktdata.toPlainText()
+        self.conn.send(['parsepkt', bytes.fromhex(text)])
             
     @pyqtSlot()
     def on_actionRdSnCfg_triggered(self):    
@@ -198,7 +239,7 @@ class MainWindow(QMainWindow):
         items=self.ui.treeWidget_node.selectedItems()     
         addr = items[0].text(0)
         pkt = upgrade.mk_chng2txm(addr, self.upgsrcaddr)
-        self.conn.send(pkt)
+        self.conn.send(['send',  0, pkt])
         self.ui.plainTextEdit_log.appendPlainText('Tx:'+' '.join(['%02X'%i for i in pkt]))
             
 #    @pyqtSlot()
@@ -211,7 +252,7 @@ class MainWindow(QMainWindow):
 
     def txpacket(self):
         if self.txpkt:
-            self.conn.send(self.txpkt[0])
+            self.conn.send(['send',  0, self.txpkt[0]])
             self.ui.plainTextEdit_log.appendPlainText('Tx:'+' '.join(['%02X'%i for i in self.txpkt[0]]))
             del self.txpkt[0]
             self.txtimer.start(1000)
@@ -258,7 +299,7 @@ class MainWindow(QMainWindow):
             self.node['node'][node]['item'] .setText(2, '')
             self.node['node'][node]['item'] .setText(3, '')
             pkt = upgrade.mk_bpsts(node, self.upgsrcaddr)
-            self.conn.send(pkt)
+            self.conn.send(['send',  0, pkt])
             self.ui.plainTextEdit_log.appendPlainText('Tx:'+' '.join(['%02X'%i for i in pkt]))
             self.upgidx += 1
             if self.upgidx == len(self.upgrdbplst):
@@ -272,7 +313,7 @@ class MainWindow(QMainWindow):
                 self.ui.plainTextEdit_log.appendPlainText('[upgrade]switch upgrade rxd mode.')
                 #print('[upgrade]switch upgrade rxd mode.')
                 pkt = upgrade.mk_upg02(self.upgsrcaddr, self.upgflen, self.upgsver, self.upgcrc)
-                self.conn.send(pkt) 
+                self.conn.send(['send',  0, pkt]) 
                 #self.ui.plainTextEdit_log.appendPlainText('Tx:'+' '.join(['%02X'%i for i in pkt]))
                 #print('Tx:'+' '.join(['%02X'%i for i in pkt]))
                 self.upgtimer.start(2000)
@@ -282,7 +323,7 @@ class MainWindow(QMainWindow):
                         #self.ui.plainTextEdit_log.appendPlainText('[upgrade]send packet %i.' % i)
                         #print('[upgrade]: send packet %i.' % i)
                         pkt = upgrade.mk_upg04(self.upgsrcaddr, self.upgflen, self.upgcrc, i+1, self.upgdata[i*128:i*128+128])
-                        self.conn.send(pkt) 
+                        self.conn.send(['send',  0, pkt]) 
                         #self.ui.plainTextEdit_log.appendPlainText('Tx:'+' '.join(['%02X'%ii for ii in pkt]))
                         #print('Tx:'+' '.join(['%02X'%ii for ii in pkt]))
                         self.upgbpflag[i] = '1'
@@ -330,14 +371,15 @@ class MainWindow(QMainWindow):
             text = self.ui.plainTextEdit_log.toPlainText()
             i =text.rfind('\n', 0, -1)
             i = 0 if i == -1 else i + 1
-            cmd = text[i:-1].split(maxsplit=1)
+            cmd = text[i:-1].split(maxsplit=2)
             if len(cmd) > 1:
                 if cmd[0] == 'send':
                     if self.conn:
                         try:
-                            pkt = bytes.fromhex(cmd[1])
-                            self.conn.send(pkt)
-                            self.ui.plainTextEdit_log.appendPlainText('[Tx]%s.\n' % cmd[1])
+                            cmd[1] = int(cmd[1])
+                            cmd[2] = bytes.fromhex(cmd[2])
+                            self.conn.send(cmd)
+                            self.ui.plainTextEdit_log.appendPlainText('[Tx]chnl(%i) %s.\n' % (cmd[1], cmd[2]))
                         except:
                             self.ui.plainTextEdit_log.appendPlainText('[error]send data error.\n')
 
