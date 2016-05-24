@@ -109,22 +109,22 @@ class MainWindow(QMainWindow):
 
     def add_treeitem(self, rdata):
         item = QTreeWidgetItem(None, rdata[0])
-        for i in range(5, 5+len(rdata[0][5:9])):
+        for i in range(6, 6+len(rdata[0][6:10])):
             if rdata[0][i] in self.highlight:
                 item.setBackground(i, QBrush(self.highlight[rdata[0][i]]))
         self.ui.treeWidget.addTopLevelItem(item)
-        # rowdata[0][?]: 5 - ndst, 6 - msrc, 7 - ndst, 8 - nsrc.
-        if rdata[0][1] == 'acRdNdCfgUp':
-            if rdata[0][8] in self.node['node']:
-                self.node['node'][rdata[0][8]]['item'] .setText(1, rdata[1]['sVer'])
+        # rowdata[0][?]: 6 - ndst, 7 - msrc, 8 - ndst, 9 - nsrc.
+        if rdata[0][2] == 'acRdNdCfgUp':
+            if rdata[0][9] in self.node['node']:
+                self.node['node'][rdata[0][9]]['item'] .setText(1, rdata[1]['sVer'])
                 self.ui.treeWidget_node.resizeColumnToContents(1)
-        elif rdata[0][1] == 'mcUpgBpStsAck':
-            if rdata[0][6] in self.node['node']:
+        elif rdata[0][2] == 'mcUpgBpStsAck':
+            if rdata[0][7] in self.node['node']:
                 print(rdata)
-                self.node['node'][rdata[0][6]]['bpFlag'] = rdata[1]['bpFlag']
+                self.node['node'][rdata[0][7]]['bpFlag'] = rdata[1]['bpFlag']
                 upgrate = 'upgRate'if 'upgRate' in rdata[1] else 'bpRate'
-                self.node['node'][rdata[0][6]]['item'] .setText(2, rdata[1][upgrate])
-                self.node['node'][rdata[0][6]]['item'] .setText(3, rdata[1]['bpFlag'])
+                self.node['node'][rdata[0][7]]['item'] .setText(2, rdata[1][upgrate])
+                self.node['node'][rdata[0][7]]['item'] .setText(3, rdata[1]['bpFlag'])
                 self.ui.treeWidget_node.resizeColumnToContents(2)
                 self.ui.treeWidget_node.resizeColumnToContents(3)
         
@@ -159,11 +159,11 @@ class MainWindow(QMainWindow):
         if pktinfo[1]:
             self.ui.treeWidget_cmdinfo.addTopLevelItem(QTreeWidgetItem(None, ('cmdType', item.text(1))))
             self.ui.treeWidget_cmdinfo.addTopLevelItem(QTreeWidgetItem(None, ('--', '--')))
-            for i in pktinfo[1]:
+            for i in pktinfo[1].items():
                 self.ui.treeWidget_cmdinfo.addTopLevelItem(QTreeWidgetItem(None, i))
             self.ui.treeWidget_cmdinfo.resizeColumnToContents(0)
         # routeLsg
-        if column == 11:
+        if column == 12:
             self.ui.plainTextEdit_pktdata.setPlainText(item.text(column))
         else:
             self.ui.plainTextEdit_pktdata.setPlainText(pktinfo[2])
@@ -239,7 +239,7 @@ class MainWindow(QMainWindow):
         items=self.ui.treeWidget_node.selectedItems()     
         addr = items[0].text(0)
         pkt = upgrade.mk_chng2txm(addr, self.upgsrcaddr)
-        self.conn.send(['send',  0, pkt])
+        self.conn.send(['send',  0x80, pkt])
         self.ui.plainTextEdit_log.appendPlainText('Tx:'+' '.join(['%02X'%i for i in pkt]))
             
 #    @pyqtSlot()
@@ -252,7 +252,7 @@ class MainWindow(QMainWindow):
 
     def txpacket(self):
         if self.txpkt:
-            self.conn.send(['send',  0, self.txpkt[0]])
+            self.conn.send(['send',  0x80, self.txpkt[0]])
             self.ui.plainTextEdit_log.appendPlainText('Tx:'+' '.join(['%02X'%i for i in self.txpkt[0]]))
             del self.txpkt[0]
             self.txtimer.start(1000)
@@ -299,7 +299,7 @@ class MainWindow(QMainWindow):
             self.node['node'][node]['item'] .setText(2, '')
             self.node['node'][node]['item'] .setText(3, '')
             pkt = upgrade.mk_bpsts(node, self.upgsrcaddr)
-            self.conn.send(['send',  0, pkt])
+            self.conn.send(['send',  0x80, pkt])
             self.ui.plainTextEdit_log.appendPlainText('Tx:'+' '.join(['%02X'%i for i in pkt]))
             self.upgidx += 1
             if self.upgidx == len(self.upgrdbplst):
@@ -313,7 +313,7 @@ class MainWindow(QMainWindow):
                 self.ui.plainTextEdit_log.appendPlainText('[upgrade]switch upgrade rxd mode.')
                 #print('[upgrade]switch upgrade rxd mode.')
                 pkt = upgrade.mk_upg02(self.upgsrcaddr, self.upgflen, self.upgsver, self.upgcrc)
-                self.conn.send(['send',  0, pkt]) 
+                self.conn.send(['send',  0x80, pkt]) 
                 #self.ui.plainTextEdit_log.appendPlainText('Tx:'+' '.join(['%02X'%i for i in pkt]))
                 #print('Tx:'+' '.join(['%02X'%i for i in pkt]))
                 self.upgtimer.start(2000)
@@ -323,7 +323,7 @@ class MainWindow(QMainWindow):
                         #self.ui.plainTextEdit_log.appendPlainText('[upgrade]send packet %i.' % i)
                         #print('[upgrade]: send packet %i.' % i)
                         pkt = upgrade.mk_upg04(self.upgsrcaddr, self.upgflen, self.upgcrc, i+1, self.upgdata[i*128:i*128+128])
-                        self.conn.send(['send',  0, pkt]) 
+                        self.conn.send(['send',  0x80, pkt]) 
                         #self.ui.plainTextEdit_log.appendPlainText('Tx:'+' '.join(['%02X'%ii for ii in pkt]))
                         #print('Tx:'+' '.join(['%02X'%ii for ii in pkt]))
                         self.upgbpflag[i] = '1'

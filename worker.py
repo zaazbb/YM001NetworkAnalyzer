@@ -18,7 +18,7 @@ testdata = [
 
 def worker(conn, port):
     try:
-        ser = serial.Serial(port,  115200, parity=serial.PARITY_EVEN, timeout=0)
+        ser = serial.Serial(port, 38400, timeout=0)
     except:
         #conn.send(['err', "can't open %s" % port])
         conn.send(['err', traceback.format_exc()])
@@ -26,6 +26,8 @@ def worker(conn, port):
     #ser.write(b'\xFE\xFE\xFE\xFE\x03\x32\x01\x30')
     #ser.write(b'\xFE\xFE\xFE\xFE\x03\x33\x01\x31')
     
+    #flog = open('pkt.log', 'a')
+        
     while True:
         if ser.in_waiting:
             try:
@@ -34,28 +36,28 @@ def worker(conn, port):
                 conn.send(['err', traceback.format_exc()])
             #buf.extend(ser.read())
             #print(ser.read(ser.in_waiting))
+            #print('<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<',  file=flog, flush=True)
+            #print(' '.join('%02X'%ii for ii in buf),  file=flog, flush=True)
+            #print('>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>',  file=flog, flush=True)
             i = buf.find(b'\xFE\xFE\xFE\xFE')
             if i != -1:
-                if len(buf) >= i + buf[4] + 7:
+                # from wl, no crc.
+                if len(buf) >= i + buf[4] + 5:
                     t = datetime.now().strftime('%H:%M:%S %f')
-                    #print(' '.join('%02X'%ii for ii in buf[i+8: i+buf[4]+5]))
+                    print(' '.join('%02X'%ii for ii in buf[i+8: i+buf[4]+5]))
+                    #print(' '.join('%02X'%ii for ii in buf[i: i+buf[4]+5]),  file=flog, flush=True)
                     try:
                         #print(buf[i:i+8])
                         pktstr = ' '.join('%02X'%ii for ii in buf[i+8: i+buf[4]+5])
                         baseinfo, extinfo = PacketParser(buf[i+8: i+buf[4]+5])
-                        baseinfo.insert(0, str(t))
+                        baseinfo[0:0] = [str(t), 'plc' if buf[i+5] == 0xFF else '%02X'%buf[i+5]]
                         conn.send(['pkt', baseinfo, extinfo, pktstr])
                     except:
                         #conn.send(['err', 'parsePktError:' + pktstr])
+                        print(' '.join('%02X'%ii for ii in buf[i: i+buf[4]+5]))
                         conn.send(['err', traceback.format_exc()])
-                        print(pktstr)
-                    del buf[: i+buf[4]+7]
-            else:
-                i = buf.find(b'\xFE')
-                if i != -1:
-                    del buf[:i]
-                else:
-                    del buf[:]
+                        #print(pktstr)
+                    del buf[: i+buf[4]+5]
         if conn.poll():
             msg = conn.recv()
             if msg[0] == 'send':
@@ -64,6 +66,9 @@ def worker(conn, port):
                 pkt[4] = len(msg[2]) + 3
                 pkt[5] = msg[1]
                 pkt[7] = pkt[4] ^ pkt[5] ^ pkt[6]
+                # crc
+                pkt.append(0)
+                pkt.append(0)
             elif msg[0] == 'parsepkt':
                 try:
                     pktstr = ' '.join('%02X'%i for i in msg[1])
