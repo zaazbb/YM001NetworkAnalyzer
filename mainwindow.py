@@ -134,7 +134,7 @@ class MainWindow(QMainWindow):
             msg = self.conn.recv()
             if msg[0] == 'pkt':
                 if msg[1][0] == 'parsepkt':
-                    if self.ui.treeWidget.topLevelItem(0).text(0) == 'parsepkt':
+                    if self.ui.treeWidget.topLevelItemCount() and self.ui.treeWidget.topLevelItem(0).text(0) == 'parsepkt':
                         self.ui.treeWidget.takeTopLevelItem(0)
                     item = QTreeWidgetItem(None, msg[1])
                     self.ui.treeWidget.insertTopLevelItem(0, item)
@@ -201,9 +201,9 @@ class MainWindow(QMainWindow):
         self.ui.treeWidget.takeTopLevelItem(0)
         
     @pyqtSlot()
-    def pushButton_parsepkt_clicked(self):
+    def on_pushButton_parsepkt_clicked(self):
         text = self.ui.plainTextEdit_pktdata.toPlainText()
-        self.conn.send(['parsepkt', bytes.fromhex(text)])
+        self.conn.send(['parsepkt', bytearray.fromhex(text)])
             
     @pyqtSlot()
     def on_actionRdSnCfg_triggered(self):    

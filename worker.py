@@ -69,6 +69,10 @@ def worker(conn, port):
                 pkt[7] = pkt[4] ^ pkt[5] ^ pkt[6]
                 # crc
                 #pkt.extend(predefined.mkCrcFun('x-25')(pkt[4:]).to_bytes(2, 'little'))
+                try:
+                    ser.write(pkt)
+                except:
+                    conn.send(['err', traceback.format_exc()])                
             elif msg[0] == 'parsepkt':
                 try:
                     pktstr = ' '.join('%02X'%i for i in msg[1])
@@ -78,10 +82,6 @@ def worker(conn, port):
                 except:
                     conn.send(['err', traceback.format_exc()])
             #print(' '.join('%02X'%i for i in pkt))
-            try:
-                ser.write(pkt)
-            except:
-                conn.send(['err', traceback.format_exc()])
 
         time.sleep(0.01)
 
