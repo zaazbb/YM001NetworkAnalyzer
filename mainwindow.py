@@ -177,7 +177,7 @@ class MainWindow(QMainWindow):
         popMenu =QMenu(self)
         popMenu.addAction(self.ui.actionSaveAs)
         popMenu.addAction(self.ui.actionLoad)
-        if self.ui.treeWidget.topLevelItem(0).text(0) == 'parsepkt':
+        if self.ui.treeWidget.topLevelItemCount() and self.ui.treeWidget.topLevelItem(0).text(0) == 'parsepkt':
             popMenu.addSeparator()
             popMenu.addAction(self.ui.actionRmParsed)
         popMenu.popup(QCursor.pos())
@@ -252,7 +252,7 @@ class MainWindow(QMainWindow):
 
     def txpacket(self):
         if self.txpkt:
-            self.conn.send(['send',  0x80, self.txpkt[0]])
+            self.conn.send(['send',  0x00, self.txpkt[0]])
             self.ui.plainTextEdit_log.appendPlainText('Tx:'+' '.join(['%02X'%i for i in self.txpkt[0]]))
             del self.txpkt[0]
             self.txtimer.start(1000)

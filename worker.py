@@ -5,6 +5,7 @@ from datetime import datetime
 import traceback
 
 import serial
+from crcmod import predefined
 
 from packet import PacketParser
 
@@ -67,8 +68,7 @@ def worker(conn, port):
                 pkt[5] = msg[1]
                 pkt[7] = pkt[4] ^ pkt[5] ^ pkt[6]
                 # crc
-                pkt.append(0)
-                pkt.append(0)
+                #pkt.extend(predefined.mkCrcFun('x-25')(pkt[4:]).to_bytes(2, 'little'))
             elif msg[0] == 'parsepkt':
                 try:
                     pktstr = ' '.join('%02X'%i for i in msg[1])
