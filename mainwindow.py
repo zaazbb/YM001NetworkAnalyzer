@@ -152,12 +152,15 @@ class MainWindow(QMainWindow):
     def on_treeWidget_itemClicked(self, item, column):
         index = self.ui.treeWidget.indexOfTopLevelItem(item)
         self.ui.treeWidget_cmdinfo.clear()
-        if index == 0 and item.text(0) == 'parsepkt':
-            pktinfo = self.parsepkt
+        if self.ui.treeWidget.topLevelItem(0).text(0) == 'parsepkt':
+            if index == 0:
+                pktinfo = self.parsepkt
+            else:
+                pktinfo = self.buf[index+1]
         else:
             pktinfo = self.buf[index]
         if pktinfo[1]:
-            self.ui.treeWidget_cmdinfo.addTopLevelItem(QTreeWidgetItem(None, ('cmdType', item.text(1))))
+            self.ui.treeWidget_cmdinfo.addTopLevelItem(QTreeWidgetItem(None, ('cmdType', item.text(2))))
             self.ui.treeWidget_cmdinfo.addTopLevelItem(QTreeWidgetItem(None, ('--', '--')))
             for i in pktinfo[1].items():
                 self.ui.treeWidget_cmdinfo.addTopLevelItem(QTreeWidgetItem(None, i))
@@ -252,7 +255,7 @@ class MainWindow(QMainWindow):
 
     def txpacket(self):
         if self.txpkt:
-            self.conn.send(['send',  0x00, self.txpkt[0]])
+            self.conn.send(['send',  0x80, self.txpkt[0]])
             self.ui.plainTextEdit_log.appendPlainText('Tx:'+' '.join(['%02X'%i for i in self.txpkt[0]]))
             del self.txpkt[0]
             self.txtimer.start(1000)
