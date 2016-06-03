@@ -5,7 +5,7 @@ from datetime import datetime
 import traceback
 
 import serial
-from crcmod import predefined
+#from crcmod import predefined
 
 from packet import PacketParser
 

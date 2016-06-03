@@ -293,7 +293,7 @@ def PacketParser(pkt):
             for ii in range(routeinfo.number):
                 n = AddrLen[getattr(routeinfo, 'addrMode%i' % ii)]
                 #pktdict['nwk']['relayLst'].append(pkt[i:i+n])
-                routeaddrs.append(reverse_hex(pkt[i:i+n]))
+                routeaddrs.append(reverse_hex(pkt[i:i+n]).lstrip('0'))
                 i += n
             baseinfo.append('-'.join(routeaddrs))
         else:
