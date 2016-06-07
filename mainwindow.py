@@ -178,7 +178,8 @@ class MainWindow(QMainWindow):
     @pyqtSlot(QPoint)
     def on_treeWidget_customContextMenuRequested(self, pos):
         popMenu =QMenu(self)
-        popMenu.addAction(self.ui.actionSaveAs)
+        if self.ui.treeWidget.topLevelItemCount():
+            popMenu.addAction(self.ui.actionSaveAs)
         popMenu.addAction(self.ui.actionLoad)
         if self.ui.treeWidget.topLevelItemCount() and self.ui.treeWidget.topLevelItem(0).text(0) == 'parsepkt':
             popMenu.addSeparator()
