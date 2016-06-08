@@ -29,16 +29,16 @@ def worker(conn, port):
     #FE FE FE FE 03 19 01 1B
     ser.write(b'\xFE\xFE\xFE\xFE\x03\x19\x01\x1B')
     
-    flog = open('pkt.log',  'w')
-    f = open('pkt.bin', 'wb')
+    #flog = open('pkt.log',  'w')
+    #f = open('pkt.bin', 'wb')
         
     while True:
         if ser.in_waiting:
             try:
                 #buf.extend(ser.read(ser.in_waiting))
                 b = ser.read(ser.in_waiting)
-                f.write(b)
-                f.flush()
+                #f.write(b)
+                #f.flush()
                 buf.extend(b)
             except:
                 conn.send(['err', traceback.format_exc()])
@@ -52,7 +52,7 @@ def worker(conn, port):
                 # from wl, no crc.
                 if len(buf) >= i + buf[i+4] + 5:
                     t = datetime.now().strftime('%H:%M:%S %f')
-                    print(' '.join('%02X'%ii for ii in buf[i+8: i+buf[i+4]+5]),  file=flog, flush=True)
+                    #print(' '.join('%02X'%ii for ii in buf[i+8: i+buf[i+4]+5]),  file=flog, flush=True)
                     #print(' '.join('%02X'%ii for ii in buf[i: i+buf[i+4]+5]),  file=flog, flush=True)
                     try:
                         #print(buf[i:i+8])
@@ -62,7 +62,7 @@ def worker(conn, port):
                         conn.send(['pkt', baseinfo, extinfo, pktstr])
                     except:
                         #conn.send(['err', 'parsePktError:' + pktstr])
-                        print('-'.join('%02X'%ii for ii in buf[i: i+buf[i+4]+5]),  file=flog, flush=True)
+                        #print('-'.join('%02X'%ii for ii in buf[i: i+buf[i+4]+5]),  file=flog, flush=True)
                         conn.send(['err', traceback.format_exc()])
                         #print(pktstr)
                     del buf[: i+buf[i+4]+5]
