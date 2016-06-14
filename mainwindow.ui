@@ -68,7 +68,7 @@
            </column>
            <column>
             <property name="text">
-             <string>fIdx</string>
+             <string>mI</string>
             </property>
            </column>
            <column>
@@ -98,7 +98,7 @@
            </column>
            <column>
             <property name="text">
-             <string>fIdx</string>
+             <string>nI</string>
             </property>
            </column>
            <column>
@@ -109,6 +109,11 @@
            <column>
             <property name="text">
              <string>routeLst</string>
+            </property>
+           </column>
+           <column>
+            <property name="text">
+             <string>aI</string>
             </property>
            </column>
            <column>

@@ -12,6 +12,8 @@ from Ui_mainwindow import Ui_MainWindow
 
 import upgrade
 
+# known issue:
+# 1, packet disp data error, when parse pkt disped.
 
 
 class MainWindow(QMainWindow):
@@ -137,6 +139,8 @@ class MainWindow(QMainWindow):
                     if self.ui.treeWidget.topLevelItemCount() and self.ui.treeWidget.topLevelItem(0).text(0) == 'parsepkt':
                         self.ui.treeWidget.takeTopLevelItem(0)
                     item = QTreeWidgetItem(None, msg[1])
+                    for i in range(self.ui.treeWidget.columnCount()):
+                        item.setBackground(i, QBrush(Qt.green))
                     self.ui.treeWidget.insertTopLevelItem(0, item)
                     self.ui.treeWidget.scrollToTop()
                     self.parsepkt = msg[1:]
@@ -156,7 +160,7 @@ class MainWindow(QMainWindow):
             if index == 0:
                 pktinfo = self.parsepkt
             else:
-                pktinfo = self.buf[index+1]
+                pktinfo = self.buf[index-1]
         else:
             pktinfo = self.buf[index]
         if pktinfo[1]:

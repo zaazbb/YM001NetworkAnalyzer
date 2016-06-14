@@ -360,6 +360,7 @@ def PacketParser(pkt):
             apsfcd = ApsFCD.from_buffer(pkt[i:i+1])
             i += 1
             #pktdict['aps'] = {'frmType': apsfcd.FTD, 'frmIdx': pkt[i]}
+            baseinfo.append(str(pkt[i]))
             baseinfo[0] = aps_ftype[apsfcd.FTD]
             i += 1
             if apsfcd.OEI:

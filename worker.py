@@ -31,6 +31,8 @@ def worker(conn, port):
     
     #flog = open('pkt.log',  'w')
     #f = open('pkt.bin', 'wb')
+    
+    frame_index = 0
         
     while True:
         if ser.in_waiting:
@@ -58,7 +60,7 @@ def worker(conn, port):
                         #print(buf[i:i+8])
                         pktstr = ' '.join('%02X'%ii for ii in buf[i+8: i+buf[i+4]+5])
                         baseinfo, extinfo = PacketParser(buf[i+8: i+buf[i+4]+5])
-                        baseinfo[0:0] = [str(t), 'plc' if buf[i+5] == 0xFF else '%i-%i'%divmod(buf[i+5], 2)]
+                        baseinfo[0:0] = [str(t), 'plc' if buf[i+5] == 0xFF else '%02i-%i'%divmod(buf[i+5], 2)]
                         conn.send(['pkt', baseinfo, extinfo, pktstr])
                     except:
                         #conn.send(['err', 'parsePktError:' + pktstr])
@@ -70,6 +72,7 @@ def worker(conn, port):
             msg = conn.recv()
             if msg[0] == 'send':
                 pkt = bytearray(b'\xFE\xFE\xFE\xFE\x00\x00\x01\x00')
+                msg[2][1] = frame_index
                 pkt.extend(msg[2])
                 pkt[4] = len(msg[2]) + 3
                 pkt[5] = msg[1]
@@ -78,13 +81,14 @@ def worker(conn, port):
                 #pkt.extend(predefined.mkCrcFun('x-25')(pkt[4:]).to_bytes(2, 'little'))
                 try:
                     ser.write(pkt)
+                    frame_index += 1
                 except:
                     conn.send(['err', traceback.format_exc()])                
             elif msg[0] == 'parsepkt':
                 try:
                     pktstr = ' '.join('%02X'%i for i in msg[1])
                     baseinfo, extinfo = PacketParser(msg[1])
-                    baseinfo.insert(0, msg[0])
+                    baseinfo[0:0] = [msg[0], '']
                     conn.send(['pkt', baseinfo, extinfo, pktstr])
                 except:
                     conn.send(['err', traceback.format_exc()])
