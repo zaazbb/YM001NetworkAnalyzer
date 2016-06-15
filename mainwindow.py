@@ -122,7 +122,7 @@ class MainWindow(QMainWindow):
                 self.ui.treeWidget_node.resizeColumnToContents(1)
         elif rdata[0][2] == 'mcUpgBpStsAck':
             if rdata[0][7] in self.node['node']:
-                print(rdata)
+                #print(rdata)
                 self.node['node'][rdata[0][7]]['bpFlag'] = rdata[1]['bpFlag']
                 upgrate = 'upgRate'if 'upgRate' in rdata[1] else 'bpRate'
                 self.node['node'][rdata[0][7]]['item'] .setText(2, rdata[1][upgrate])
@@ -250,13 +250,13 @@ class MainWindow(QMainWindow):
         self.conn.send(['send',  0x80, pkt])
         self.ui.plainTextEdit_log.appendPlainText('Tx:'+' '.join(['%02X'%i for i in pkt]))
             
-#    @pyqtSlot()
-#    def on_actionUpgRdBack_triggered(self):
-#        items=self.ui.treeWidget_node.selectedItems()     
-#        addr = items[0].text(0)
-#        pkt = upgrade.mk_readback(addr, self.upgsrcaddr)
-#        self.conn.send(pkt)
-#        self.ui.plainTextEdit_log.appendPlainText('Tx:'+' '.join(['%02X'%i for i in pkt]))
+    @pyqtSlot()
+    def on_actionUpgRdBack_triggered(self):
+        items=self.ui.treeWidget_node.selectedItems()     
+        addr = items[0].text(0)
+        pkt = upgrade.mk_readback(addr, self.upgsrcaddr)
+        self.conn.send(['send',  0x80, pkt])
+        self.ui.plainTextEdit_log.appendPlainText('Tx:'+' '.join(['%02X'%i for i in pkt]))
 
     def txpacket(self):
         if self.txpkt:
@@ -273,8 +273,8 @@ class MainWindow(QMainWindow):
             popMenu.addAction(self.ui.actionUpgBpSts)
             popMenu.addSeparator()
             popMenu.addAction(self.ui.actionUpgTxm)  
-            #popMenu.addSeparator()
-            #popMenu.addAction(self.ui.actionUpgRdBack)  
+            popMenu.addSeparator()
+            popMenu.addAction(self.ui.actionUpgRdBack)  
             popMenu.popup(QCursor.pos())
         
     @pyqtSlot()
@@ -385,7 +385,7 @@ class MainWindow(QMainWindow):
                     if self.conn:
                         try:
                             cmd[1] = int(cmd[1])
-                            cmd[2] = bytes.fromhex(cmd[2])
+                            cmd[2] = bytearray.fromhex(cmd[2])
                             self.conn.send(cmd)
                             self.ui.plainTextEdit_log.appendPlainText('[Tx]chnl(%i) %s.\n' % (cmd[1], cmd[2]))
                         except:

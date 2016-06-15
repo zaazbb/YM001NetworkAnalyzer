@@ -19,6 +19,12 @@ def mk_upg02(src, flen, sver, crc):
     pkt[i:i+4] = crc.to_bytes(4, 'little')
     return pkt
 
+def _chk_xor(d):
+    xor = 0
+    for i in d:
+        xor ^= i
+    return xor
+
 def mk_upg04(src, flen, crc, index, d):
     template = '43 CD 01 FF FF FF FF FF FF FF FF 33 21 10 03 00 00 F0 04 01 00 6E 01 1D 4D 95 28 01 00 80'
     pkt = bytearray.fromhex(template)
@@ -34,6 +40,8 @@ def mk_upg04(src, flen, crc, index, d):
     i += 4
     pkt[i:i+2] = index.to_bytes(2, 'little')
     pkt.extend(d)
+    pkt.append(sum(d) % 0x100)
+    pkt.append(_chk_xor(d))
     return pkt
 
 def mk_bpsts(dst, src):

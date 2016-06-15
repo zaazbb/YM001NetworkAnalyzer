@@ -72,7 +72,7 @@ def worker(conn, port):
             msg = conn.recv()
             if msg[0] == 'send':
                 pkt = bytearray(b'\xFE\xFE\xFE\xFE\x00\x00\x01\x00')
-                msg[2][1] = frame_index
+                msg[2][2] = frame_index
                 pkt.extend(msg[2])
                 pkt[4] = len(msg[2]) + 3
                 pkt[5] = msg[1]
@@ -82,6 +82,8 @@ def worker(conn, port):
                 try:
                     ser.write(pkt)
                     frame_index += 1
+                    if frame_index == 256:
+                        frame_index = 0
                 except:
                     conn.send(['err', traceback.format_exc()])                
             elif msg[0] == 'parsepkt':
