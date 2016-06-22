@@ -25,7 +25,7 @@
         <enum>QTabWidget::North</enum>
        </property>
        <property name="currentIndex">
-        <number>0</number>
+        <number>2</number>
        </property>
        <widget class="QWidget" name="tab">
         <attribute name="title">
@@ -137,7 +137,7 @@
               <number>0</number>
              </property>
              <attribute name="headerVisible">
-              <bool>true</bool>
+              <bool>false</bool>
              </attribute>
              <column>
               <property name="text">
@@ -233,6 +233,9 @@
            </item>
            <item>
             <widget class="QCheckBox" name="checkBox_upgauto">
+             <property name="toolTip">
+              <string>after chngm&amp;send,auto readbp &amp; calcbp,and reloop,until bp is allone.</string>
+             </property>
              <property name="text">
               <string>auto</string>
              </property>
@@ -240,6 +243,9 @@
            </item>
            <item>
             <widget class="QCheckBox" name="checkBox_usebp">
+             <property name="toolTip">
+              <string>used when aoto is unchecked.calcbp before chngm&amp;send.</string>
+             </property>
              <property name="text">
               <string>usebp</string>
              </property>
@@ -258,6 +264,49 @@
           </layout>
          </item>
         </layout>
+       </widget>
+       <widget class="QWidget" name="tab_3">
+        <attribute name="title">
+         <string>rdebug</string>
+        </attribute>
+        <widget class="QTreeWidget" name="treeWidget_2">
+         <property name="geometry">
+          <rect>
+           <x>10</x>
+           <y>10</y>
+           <width>211</width>
+           <height>261</height>
+          </rect>
+         </property>
+         <column>
+          <property name="text">
+           <string notr="true">1</string>
+          </property>
+         </column>
+        </widget>
+        <widget class="QSpinBox" name="spinBox">
+         <property name="geometry">
+          <rect>
+           <x>270</x>
+           <y>40</y>
+           <width>44</width>
+           <height>22</height>
+          </rect>
+         </property>
+        </widget>
+        <widget class="QSlider" name="horizontalSlider">
+         <property name="geometry">
+          <rect>
+           <x>260</x>
+           <y>230</y>
+           <width>160</width>
+           <height>16</height>
+          </rect>
+         </property>
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+        </widget>
        </widget>
       </widget>
       <widget class="QPlainTextEdit" name="plainTextEdit_log"/>
@@ -298,6 +347,11 @@
   <action name="actionRmParsed">
    <property name="text">
     <string>rmParsed</string>
+   </property>
+  </action>
+  <action name="actionClear">
+   <property name="text">
+    <string>clear</string>
    </property>
   </action>
  </widget>

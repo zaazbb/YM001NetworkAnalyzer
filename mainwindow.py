@@ -184,23 +184,32 @@ class MainWindow(QMainWindow):
         popMenu =QMenu(self)
         if self.ui.treeWidget.topLevelItemCount():
             popMenu.addAction(self.ui.actionSaveAs)
-        popMenu.addAction(self.ui.actionLoad)
+            popMenu.addAction(self.ui.actionLoad)
+            popMenu.addSeparator()
+            popMenu.addAction(self.ui.actionClear)
+        else:
+            popMenu.addAction(self.ui.actionLoad)
         if self.ui.treeWidget.topLevelItemCount() and self.ui.treeWidget.topLevelItem(0).text(0) == 'parsepkt':
             popMenu.addSeparator()
             popMenu.addAction(self.ui.actionRmParsed)
         popMenu.popup(QCursor.pos())
         
     @pyqtSlot()
+    def on_actionClear_triggered(self):
+        self.buf = []
+        self.ui.treeWidget.clear()
+        
+    @pyqtSlot()
     def on_actionSaveAs_triggered(self):
         t = datetime.now().strftime('%y-%m-%d_%H-%M-%S')
-        file = QFileDialog.getSaveFileName(self, 'Save file', t, 'data file(*.dat)')[0]
+        file = QFileDialog.getSaveFileName(self, 'Save file', './dat/' + t, 'data file(*.dat)')[0]
         if file:
             with open(file, 'wb') as f:
                 pickle.dump(self.buf, f)
             
     @pyqtSlot()
     def on_actionLoad_triggered(self):
-        file = QFileDialog.getOpenFileName(self, 'Load file', filter='data file(*.dat)')[0]
+        file = QFileDialog.getOpenFileName(self, 'Load file',  './dat',  'data file(*.dat)')[0]
         if file:
             self.load_file(file)
             
@@ -283,13 +292,17 @@ class MainWindow(QMainWindow):
             self.ui.plainTextEdit_log.appendPlainText('Tx busy.')
             return
         self.upgrdbplst = []
-        self.upgidx = 0
+        self.upgi = 0
         self.upgdata = upgrade.get_app_code(self.config['upgrade']['file'])
         self.upgflen = self.upgdata[0x400+2]+self.upgdata[0x400+7]*0x100
         self.upgsver = int.from_bytes(self.upgdata[0x100:0x100+4], 'big')
         self.upgcrc = int.from_bytes(self.upgdata[-4:], 'big')
+        # auto = 1, change mode - send data - read bp - calc bp , and loop.
+        # auto = 0, change mode - send data.
+        # when auto = 0, usebp = 1, calc bp - change mode - send data.
+        # when auto = 0, usebp = 0, change mode - send data.
         if self.ui.checkBox_upgauto.isChecked() or not self.ui.checkBox_usebp.isChecked():
-            # 0 - change mode, 1 - send data, 3 - calc bpflag
+            # 0 - change mode, 1 - send data, 2 - calc bpflag
             self.upgsts = 0
             self.upgbpflag = ['0'] * self.upgflen
             self.ui.progressBar_upgrade.setValue(0)
@@ -300,7 +313,7 @@ class MainWindow(QMainWindow):
         
     def upgrade(self):
         if self.upgrdbplst:
-            node = self.upgrdbplst[self.upgidx]
+            node = self.upgrdbplst[self.upgi]
             self.ui.plainTextEdit_log.appendPlainText('[upgrade]read bpflag %s' % node)
             #print('[upgrade]read bpflag %s' % node)
             self.node['node'][node]['bpFlag'] = ''
@@ -309,24 +322,29 @@ class MainWindow(QMainWindow):
             pkt = upgrade.mk_bpsts(node, self.upgsrcaddr)
             self.conn.send(['send',  0x80, pkt])
             self.ui.plainTextEdit_log.appendPlainText('Tx:'+' '.join(['%02X'%i for i in pkt]))
-            self.upgidx += 1
-            if self.upgidx == len(self.upgrdbplst):
-                self.upgidx = 0
+            self.upgi += 1
+            if self.upgi == len(self.upgrdbplst):
+                self.upgi = 0
                 self.upgrdbplst = []
                 self.upgsts = 2
             self.upgtimer.start(1000)
         else:
             if self.upgsts == 0:
-                self.upgsts = 1
                 self.ui.plainTextEdit_log.appendPlainText('[upgrade]switch upgrade rxd mode.')
                 #print('[upgrade]switch upgrade rxd mode.')
                 pkt = upgrade.mk_upg02(self.upgsrcaddr, self.upgflen, self.upgsver, self.upgcrc)
                 self.conn.send(['send',  0x80, pkt]) 
                 #self.ui.plainTextEdit_log.appendPlainText('Tx:'+' '.join(['%02X'%i for i in pkt]))
                 #print('Tx:'+' '.join(['%02X'%i for i in pkt]))
-                self.upgtimer.start(2000)
+                self.upgi += 1
+                # send chngm 5 times.
+                if self.upgi < 5:
+                    self.upgtimer.start(500)
+                else:
+                    self.upgsts = 1
+                    self.upgtimer.start(2000)
             elif self.upgsts == 1:
-                for i in range(self.upgidx, self.upgflen):
+                for i in range(self.upgi, self.upgflen):
                     if self.upgbpflag[i] == '0':
                         #self.ui.plainTextEdit_log.appendPlainText('[upgrade]send packet %i.' % i)
                         #print('[upgrade]: send packet %i.' % i)
@@ -337,12 +355,12 @@ class MainWindow(QMainWindow):
                         self.upgbpflag[i] = '1'
                         max = self.ui.progressBar_upgrade.maximum()
                         self.ui.progressBar_upgrade.setValue(max - self.upgbpflag.count('0'))
-                        self.upgidx = i+1
+                        self.upgi = i+1
                         self.upgtimer.start(500)
                         break
                 else:
                     if self.ui.checkBox_upgauto.isChecked():
-                        self.upgidx = 0
+                        self.upgi = 0
                         self.upgrdbplst = list(self.node['node'].keys())
                         self.upgtimer.start(500)
                     else:
@@ -350,6 +368,7 @@ class MainWindow(QMainWindow):
                         #print('[upgrade]upgrade finished.')
             else:
                 self.upgsts = 0
+                self.upgi = 0
                 totbpflag = bytearray(b'\xFF' * 64)
                 for node in self.node['node']:
                     if self.node['node'][node]['bpFlag']:
@@ -384,10 +403,11 @@ class MainWindow(QMainWindow):
                 if cmd[0] == 'send':
                     if self.conn:
                         try:
-                            cmd[1] = int(cmd[1])
+                            cmd[1] = int(cmd[1], 16)
                             cmd[2] = bytearray.fromhex(cmd[2])
                             self.conn.send(cmd)
-                            self.ui.plainTextEdit_log.appendPlainText('[Tx]chnl(%i) %s.\n' % (cmd[1], cmd[2]))
+                            self.ui.plainTextEdit_log.appendPlainText(
+                                '[Tx]chnl(%i) %s.\n' % (cmd[1], ' '.join('%02X'%ii for ii in cmd[2])))
                         except:
                             self.ui.plainTextEdit_log.appendPlainText('[error]send data error.\n')
 

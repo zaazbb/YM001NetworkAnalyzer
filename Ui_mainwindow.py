@@ -112,6 +112,8 @@ class Ui_MainWindow(object):
         self.actionUpgRdBack.setObjectName("actionUpgRdBack")
         self.actionRmParsed = QtWidgets.QAction(MainWindow)
         self.actionRmParsed.setObjectName("actionRmParsed")
+        self.actionClear = QtWidgets.QAction(MainWindow)
+        self.actionClear.setObjectName("actionClear")
 
         self.retranslateUi(MainWindow)
         self.tabWidget.setCurrentIndex(0)
@@ -145,7 +147,9 @@ class Ui_MainWindow(object):
         self.treeWidget_node.headerItem().setText(2, _translate("MainWindow", "upgRate"))
         self.treeWidget_node.headerItem().setText(3, _translate("MainWindow", "bpFlag"))
         self.progressBar_upgrade.setFormat(_translate("MainWindow", "%v/%m"))
+        self.checkBox_upgauto.setToolTip(_translate("MainWindow", "after chngm&send,auto readbp & calcbp,and reloop,until bp is allone."))
         self.checkBox_upgauto.setText(_translate("MainWindow", "auto"))
+        self.checkBox_usebp.setToolTip(_translate("MainWindow", "used when aoto is unchecked.calcbp before chngm&send."))
         self.checkBox_usebp.setText(_translate("MainWindow", "usebp"))
         self.pushButton_upgrade.setText(_translate("MainWindow", "upgrade"))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_2), _translate("MainWindow", "node"))
@@ -156,6 +160,7 @@ class Ui_MainWindow(object):
         self.actionRdSnCfg.setText(_translate("MainWindow", "rdSnCfg"))
         self.actionUpgRdBack.setText(_translate("MainWindow", "upgRdBack"))
         self.actionRmParsed.setText(_translate("MainWindow", "rmParsed"))
+        self.actionClear.setText(_translate("MainWindow", "clear"))
 
 
 if __name__ == "__main__":

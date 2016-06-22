@@ -59,6 +59,7 @@ def worker(conn, port):
                     try:
                         #print(buf[i:i+8])
                         pktstr = ' '.join('%02X'%ii for ii in buf[i+8: i+buf[i+4]+5])
+                        #print(pktstr)
                         baseinfo, extinfo = PacketParser(buf[i+8: i+buf[i+4]+5])
                         baseinfo[0:0] = [str(t), 'plc' if buf[i+5] == 0xFF else '%02i-%i'%divmod(buf[i+5], 2)]
                         conn.send(['pkt', baseinfo, extinfo, pktstr])

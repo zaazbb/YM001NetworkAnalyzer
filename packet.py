@@ -262,6 +262,10 @@ def PacketParser(pkt):
                 cmdinfo['bpFlag'] = pkt[i:i+64].hex().upper()
             else:
                 baseinfo[0] = 'mcUpg???'
+        elif pkt[i] == 0xF1:
+            # remote debug.
+            baseinfo[0] = 'mcRdbg'
+            i += 1
         else:
             baseinfo[0] = 'mcReserve'
     elif macfcd.FTD == 1:

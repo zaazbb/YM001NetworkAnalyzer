@@ -1,5 +1,8 @@
 
-with open('app.M51') as f:
+import pprint
+
+
+with open(r'D:\work\repository\YM001\trunk\software\proj\app\obj\app.M51') as f:
     global_area = False
     module = ''
     gvar = []
@@ -17,14 +20,14 @@ with open('app.M51') as f:
              or line.startswith('  -------         ENDMOD'):
             global_area = False
 print('finished.')
-print(gvar)
+pprint.pprint(gvar)
 
 
 gvar_by_addr = sorted(gvar, key=lambda d:d[1])
-print(gvar_by_addr)
+pprint.pprint(gvar_by_addr)
 for i in range(len(gvar_by_addr)-1):
     gvar_by_addr[i][2] = gvar_by_addr[i+1][1] - gvar_by_addr[i][1]
 gvar_by_addr[-1][2] = 0x8000 - gvar_by_addr[-1][1]
 
-print(gvar_by_addr)
-print(sorted(gvar_by_addr, key=lambda d:d[0]))
+pprint.pprint(gvar_by_addr)
+pprint.pprint(sorted(gvar_by_addr, key=lambda d:d[0]))
