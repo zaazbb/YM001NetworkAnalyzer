@@ -11,6 +11,7 @@ from PyQt5.QtCore import QTimer, pyqtSlot, Qt, QPoint
 from Ui_mainwindow import Ui_MainWindow
 
 import upgrade
+import rdebug
 
 # known issue:
 # 1, packet disp data error, when parse pkt disped.
@@ -76,6 +77,14 @@ class MainWindow(QMainWindow):
                 menu.addMenu(submenu)
         self.ui.pushButton_mkpkt.setMenu(menu)
         
+        self.rdbglst = rdebug.get_xval(config['rdebug']['mapfile'])
+        for i in self.rdbglst:
+            item = QTreeWidgetItem(None, [i[0], '%04X'%i[1],  str(i[2])])
+            self.ui.treeWidget_rdbglst.addTopLevelItem(item)
+        for i in range(self.ui.treeWidget_rdbglst.columnCount()):
+             self.ui.treeWidget_rdbglst.resizeColumnToContents(i)
+        self.rdbgidx = 0
+        
         self.buf = []
         self.conn = None
         if conn_file:
@@ -86,6 +95,7 @@ class MainWindow(QMainWindow):
                 self.conn = conn_file
                 self.ui.pushButton_parsepkt.setEnabled(True)
                 self.ui.pushButton_upgrade.setEnabled(True)
+                self.ui.pushButton_rdbgsend.setEnabled(True)
                 self.timer = QTimer(self)
                 self.timer.timeout.connect(self.update)
                 self.timer.start(100)     
@@ -129,6 +139,9 @@ class MainWindow(QMainWindow):
                 self.node['node'][rdata[0][7]]['item'] .setText(3, rdata[1]['bpFlag'])
                 self.ui.treeWidget_node.resizeColumnToContents(2)
                 self.ui.treeWidget_node.resizeColumnToContents(3)
+        elif rdata[0][2] == 'mcRdbg':
+            if rdata[0][7] in self.node['node']:
+                self.ui.plainTextEdit_rdbgresp.setPlainText(rdata[1]['dat'])
         
         #plainTextEdit
     def update(self):
@@ -147,6 +160,8 @@ class MainWindow(QMainWindow):
                 else:
                     self.buf.append(msg[1:])
                     self.add_treeitem(msg[1:])
+                    if self.ui.checkBox_autoscroll.isChecked():
+                        self.ui.treeWidget.scrollToBottom()
                 for i in range(self.ui.treeWidget.columnCount()):
                      self.ui.treeWidget.resizeColumnToContents(i)
             elif msg[0] == 'err':
@@ -410,4 +425,26 @@ class MainWindow(QMainWindow):
                                 '[Tx]chnl(%i) %s.\n' % (cmd[1], ' '.join('%02X'%ii for ii in cmd[2])))
                         except:
                             self.ui.plainTextEdit_log.appendPlainText('[error]send data error.\n')
+    
+    @pyqtSlot(QTreeWidgetItem, int)
+    def on_treeWidget_rdbglst_itemClicked(self, item, column):
+        row = self.ui.treeWidget_rdbglst.indexOfTopLevelItem(item)
+        self.ui.label_rdbgaddr.setText('0x%04X' % self.rdbglst[row][1])
+        len = self.rdbglst[row][2]
+        val = len if len < 128 else 128
+        self.ui.spinBox_rdbglen.setMaximum(val)
+        self.ui.spinBox_rdbglen.setValue(val)
 
+    @pyqtSlot()
+    def on_pushButton_rdbgsend_clicked(self):
+        self.ui.plainTextEdit_rdbgresp.setPlainText('')
+        items = self.ui.treeWidget_node.selectedItems()     
+        if items:
+            addr = items[0].text(0)
+            self.rdbgidx += 1
+            pkt = rdebug.mk_rxval(addr, self.upgsrcaddr, self.rdbgidx % 128, 
+                int(self.ui.label_rdbgaddr.text(), 16), self.ui.spinBox_rdbglen.value())
+            self.conn.send(['send',  0x80, pkt])
+            self.ui.plainTextEdit_log.appendPlainText('Tx:'+' '.join(['%02X'%i for i in pkt]))
+        else:
+            self.ui.plainTextEdit_log.appendPlainText('[rdbg]read xdata: Need select a node.')

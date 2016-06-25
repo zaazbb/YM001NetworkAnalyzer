@@ -266,6 +266,14 @@ def PacketParser(pkt):
             # remote debug.
             baseinfo[0] = 'mcRdbg'
             i += 1
+            cmdinfo['dir'] = 'up' if pkt[i]&0x80 else 'down'
+            cmdinfo['index'] = str(pkt[i] & 0x7F)
+            i += 1
+            cmdinfo['cmd'] = str(pkt[i])
+            i += 1
+            cmdinfo['len'] = str(pkt[i])
+            i += 1
+            cmdinfo['dat'] = ' '.join('%02X'%ii for ii in pkt[i:-2])
         else:
             baseinfo[0] = 'mcReserve'
     elif macfcd.FTD == 1:

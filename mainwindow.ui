@@ -25,7 +25,7 @@
         <enum>QTabWidget::North</enum>
        </property>
        <property name="currentIndex">
-        <number>2</number>
+        <number>0</number>
        </property>
        <widget class="QWidget" name="tab">
         <attribute name="title">
@@ -124,7 +124,7 @@
           </widget>
          </item>
          <item>
-          <layout class="QVBoxLayout" name="verticalLayout" stretch="2,1,0">
+          <layout class="QVBoxLayout" name="verticalLayout" stretch="0,1,0">
            <item>
             <widget class="QTreeWidget" name="treeWidget_cmdinfo">
              <property name="sizePolicy">
@@ -157,6 +157,16 @@
            <item>
             <layout class="QHBoxLayout" name="horizontalLayout">
              <item>
+              <widget class="QCheckBox" name="checkBox_autoscroll">
+               <property name="text">
+                <string>autoscroll</string>
+               </property>
+               <property name="checked">
+                <bool>true</bool>
+               </property>
+              </widget>
+             </item>
+             <item>
               <widget class="QPushButton" name="pushButton_parsepkt">
                <property name="enabled">
                 <bool>false</bool>
@@ -188,36 +198,113 @@
         <attribute name="title">
          <string>node</string>
         </attribute>
-        <layout class="QVBoxLayout" name="verticalLayout_3">
+        <layout class="QVBoxLayout" name="verticalLayout_4">
          <item>
-          <widget class="QTreeWidget" name="treeWidget_node">
-           <property name="contextMenuPolicy">
-            <enum>Qt::CustomContextMenu</enum>
-           </property>
-           <property name="selectionMode">
-            <enum>QAbstractItemView::ExtendedSelection</enum>
-           </property>
-           <column>
-            <property name="text">
-             <string>node</string>
-            </property>
-           </column>
-           <column>
-            <property name="text">
-             <string>sver</string>
-            </property>
-           </column>
-           <column>
-            <property name="text">
-             <string>upgRate</string>
-            </property>
-           </column>
-           <column>
-            <property name="text">
-             <string>bpFlag</string>
-            </property>
-           </column>
-          </widget>
+          <layout class="QHBoxLayout" name="horizontalLayout_5" stretch="1,0">
+           <item>
+            <widget class="QTreeWidget" name="treeWidget_node">
+             <property name="contextMenuPolicy">
+              <enum>Qt::CustomContextMenu</enum>
+             </property>
+             <property name="selectionMode">
+              <enum>QAbstractItemView::ExtendedSelection</enum>
+             </property>
+             <column>
+              <property name="text">
+               <string>node</string>
+              </property>
+             </column>
+             <column>
+              <property name="text">
+               <string>sver</string>
+              </property>
+             </column>
+             <column>
+              <property name="text">
+               <string>upgRate</string>
+              </property>
+             </column>
+             <column>
+              <property name="text">
+               <string>bpFlag</string>
+              </property>
+             </column>
+            </widget>
+           </item>
+           <item>
+            <layout class="QVBoxLayout" name="verticalLayout_3" stretch="0,0,0">
+             <item>
+              <widget class="QTreeWidget" name="treeWidget_rdbglst">
+               <property name="indentation">
+                <number>0</number>
+               </property>
+               <column>
+                <property name="text">
+                 <string>var</string>
+                </property>
+               </column>
+               <column>
+                <property name="text">
+                 <string>addr</string>
+                </property>
+               </column>
+               <column>
+                <property name="text">
+                 <string>len</string>
+                </property>
+               </column>
+              </widget>
+             </item>
+             <item>
+              <layout class="QHBoxLayout" name="horizontalLayout_4" stretch="0,0,0">
+               <item>
+                <widget class="QLabel" name="label_rdbgaddr">
+                 <property name="text">
+                  <string>addr</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QSpinBox" name="spinBox_rdbglen">
+                 <property name="minimum">
+                  <number>1</number>
+                 </property>
+                 <property name="maximum">
+                  <number>128</number>
+                 </property>
+                 <property name="displayIntegerBase">
+                  <number>10</number>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QPushButton" name="pushButton_rdbgsend">
+                 <property name="enabled">
+                  <bool>false</bool>
+                 </property>
+                 <property name="text">
+                  <string>Send</string>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </item>
+             <item>
+              <widget class="QPlainTextEdit" name="plainTextEdit_rdbgresp">
+               <property name="maximumSize">
+                <size>
+                 <width>16777215</width>
+                 <height>100</height>
+                </size>
+               </property>
+               <property name="plainText">
+                <string/>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+          </layout>
          </item>
          <item>
           <layout class="QHBoxLayout" name="horizontalLayout_2">
@@ -264,49 +351,6 @@
           </layout>
          </item>
         </layout>
-       </widget>
-       <widget class="QWidget" name="tab_3">
-        <attribute name="title">
-         <string>rdebug</string>
-        </attribute>
-        <widget class="QTreeWidget" name="treeWidget_2">
-         <property name="geometry">
-          <rect>
-           <x>10</x>
-           <y>10</y>
-           <width>211</width>
-           <height>261</height>
-          </rect>
-         </property>
-         <column>
-          <property name="text">
-           <string notr="true">1</string>
-          </property>
-         </column>
-        </widget>
-        <widget class="QSpinBox" name="spinBox">
-         <property name="geometry">
-          <rect>
-           <x>270</x>
-           <y>40</y>
-           <width>44</width>
-           <height>22</height>
-          </rect>
-         </property>
-        </widget>
-        <widget class="QSlider" name="horizontalSlider">
-         <property name="geometry">
-          <rect>
-           <x>260</x>
-           <y>230</y>
-           <width>160</width>
-           <height>16</height>
-          </rect>
-         </property>
-         <property name="orientation">
-          <enum>Qt::Horizontal</enum>
-         </property>
-        </widget>
        </widget>
       </widget>
       <widget class="QPlainTextEdit" name="plainTextEdit_log"/>
