@@ -27,7 +27,10 @@ def worker(conn, port):
     #ser.write(b'\xFE\xFE\xFE\xFE\x03\x32\x01\x30')
     #ser.write(b'\xFE\xFE\xFE\xFE\x03\x33\x01\x31')
     #FE FE FE FE 03 19 01 1B
-    ser.write(b'\xFE\xFE\xFE\xFE\x03\x19\x01\x1B')
+    #ser.write(b'\xFE\xFE\xFE\xFE\x03\x19\x01\x1B')
+    ser.write(b'\xFE\xFE\xFE\xFE\x03\x0E\x01\x1B')
+    #ser.write(b'\xFE\xFE\xFE\xFE\x03\x01\x01\x1B')
+    #ser.write(b'\xFE\xFE\xFE\xFE\x03\x18\x01\x1B')
     
     #flog = open('pkt.log',  'w')
     #f = open('pkt.bin', 'wb')
@@ -52,7 +55,7 @@ def worker(conn, port):
             i = buf.find(b'\xFE\xFE\xFE\xFE')
             if i != -1:
                 # from wl, no crc.
-                if len(buf) >= i + buf[i+4] + 5:
+                if len(buf) > i+4 and len(buf)>= i + buf[i+4] + 5:
                     t = datetime.now().strftime('%H:%M:%S %f')
                     #print(' '.join('%02X'%ii for ii in buf[i+8: i+buf[i+4]+5]),  file=flog, flush=True)
                     #print(' '.join('%02X'%ii for ii in buf[i: i+buf[i+4]+5]),  file=flog, flush=True)

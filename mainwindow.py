@@ -357,6 +357,7 @@ class MainWindow(QMainWindow):
                     self.upgtimer.start(500)
                 else:
                     self.upgsts = 1
+                    self.upgi = 0
                     self.upgtimer.start(2000)
             elif self.upgsts == 1:
                 for i in range(self.upgi, self.upgflen):

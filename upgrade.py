@@ -42,6 +42,10 @@ def mk_upg04(src, flen, crc, index, d):
     pkt.extend(d)
     pkt.append(sum(d) % 0x100)
     pkt.append(_chk_xor(d))
+##    with open('upgdat.txt', 'a') as f:
+##        f.write('index=%i\n'%index)
+##        f.write(' '.join('%02X'%i for i in d))
+##        f.write('\n')
     return pkt
 
 def mk_bpsts(dst, src):
@@ -136,3 +140,9 @@ def mk_readback(dst, src):
     pkt[i:i+6] = srcaddr
     return pkt
     
+
+if __name__ == '__main__':
+    d = get_app_code(r'D:\work\repository\YM001\trunk\software\proj\app\obj\app_with_boot.fcb')
+    print(' '.join('%02X'%i for i in d[:128]))
+    print(' '.join('%02X'%i for i in d[-256:-128]))
+    print(' '.join('%02X'%i for i in d[-128:]))
