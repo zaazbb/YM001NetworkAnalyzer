@@ -258,7 +258,10 @@ def PacketParser(pkt):
                 n = int.from_bytes(pkt[i:i+2], 'little')
                 cmdinfo['pktnum'] = str(n)
                 i += 2
-                cmdinfo['upgRate'] = bitrate(pkt[i:i+64], n)
+                if n == 0:
+                    cmdinfo['upgRate'] = '??'
+                else:
+                    cmdinfo['upgRate'] = bitrate(pkt[i:i+64], n)
                 cmdinfo['bpFlag'] = pkt[i:i+64].hex().upper()
             else:
                 baseinfo[0] = 'mcUpg???'

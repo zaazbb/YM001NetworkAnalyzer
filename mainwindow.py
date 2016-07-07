@@ -58,24 +58,24 @@ class MainWindow(QMainWindow):
         for i in range(self.ui.treeWidget_node.columnCount()):
              self.ui.treeWidget_node.resizeColumnToContents(i)
              
-        menu = QMenu(self)
-        for i in ['mBeacon', 'mAck', 
-                ['mCmd', 'mcNwkMntnReq', 'mcNwkMntnResp', 'mcSoftUpgrade'], 
-                ['nCmd', 'ncJoinNwkReq', 'ncJoinNwkResp', 'ncRouteErr', 'ncFiGather',  
-                    'ncFiGatherResp',  'ncCfgSn', 'ncCfgSnResp', 'ncFreeNdRdy'], 
-                'aAckNack',  
-                ['aCmd', 'acCfgUart', 'acSetChnlGrp', 'acSetRssi', 'acSetTsmtPower', 
-                    'acRdNdCfg', 'acDevReboot', 'acSoftUpgrade', 'acBcastTiming'], 
-                'aRoute', 
-                'aReport']:
-            if isinstance(i, str):
-                menu.addAction(i)
-            else:
-                submenu = QMenu(i[0], menu)
-                for ii in  i[1:]:
-                    submenu.addAction(ii)
-                menu.addMenu(submenu)
-        self.ui.pushButton_mkpkt.setMenu(menu)
+#        menu = QMenu(self)
+#        for i in ['mBeacon', 'mAck', 
+#                ['mCmd', 'mcNwkMntnReq', 'mcNwkMntnResp', 'mcSoftUpgrade'], 
+#                ['nCmd', 'ncJoinNwkReq', 'ncJoinNwkResp', 'ncRouteErr', 'ncFiGather',  
+#                    'ncFiGatherResp',  'ncCfgSn', 'ncCfgSnResp', 'ncFreeNdRdy'], 
+#                'aAckNack',  
+#                ['aCmd', 'acCfgUart', 'acSetChnlGrp', 'acSetRssi', 'acSetTsmtPower', 
+#                    'acRdNdCfg', 'acDevReboot', 'acSoftUpgrade', 'acBcastTiming'], 
+#                'aRoute', 
+#                'aReport']:
+#            if isinstance(i, str):
+#                menu.addAction(i)
+#            else:
+#                submenu = QMenu(i[0], menu)
+#                for ii in  i[1:]:
+#                    submenu.addAction(ii)
+#                menu.addMenu(submenu)
+#        self.ui.pushButton_mkpkt.setMenu(menu)
         
         self.rdbglst = rdebug.get_xval(config['rdebug']['mapfile'])
         for i in self.rdbglst:
@@ -84,6 +84,7 @@ class MainWindow(QMainWindow):
         for i in range(self.ui.treeWidget_rdbglst.columnCount()):
              self.ui.treeWidget_rdbglst.resizeColumnToContents(i)
         self.rdbgidx = 0
+        self.ui.plainTextEdit_log.keyReleaseEvent = self.keyReleaseEvent
         
         self.buf = []
         self.conn = None
@@ -93,6 +94,7 @@ class MainWindow(QMainWindow):
                     self.load_file(conn_file)
             else:
                 self.conn = conn_file
+                self.ui.comboBox_chnlgrp.setEnabled(True)
                 self.ui.pushButton_parsepkt.setEnabled(True)
                 self.ui.pushButton_upgrade.setEnabled(True)
                 self.ui.pushButton_rdbgsend.setEnabled(True)
@@ -106,8 +108,7 @@ class MainWindow(QMainWindow):
                 self.txtimer = QTimer(self)
                 self.txtimer.setSingleShot(True)
                 self.txtimer.timeout.connect(self.txpacket)
-
-        self.ui.plainTextEdit_log.keyReleaseEvent = self.keyReleaseEvent
+                self.ui.comboBox_chnlgrp.setCurrentIndex(config['DEFAULT'].getint('channelgroup'))
             
         
     def load_file(self, file):
@@ -134,8 +135,7 @@ class MainWindow(QMainWindow):
             if rdata[0][7] in self.node['node']:
                 #print(rdata)
                 self.node['node'][rdata[0][7]]['bpFlag'] = rdata[1]['bpFlag']
-                upgrate = 'upgRate'if 'upgRate' in rdata[1] else 'bpRate'
-                self.node['node'][rdata[0][7]]['item'] .setText(2, rdata[1][upgrate])
+                self.node['node'][rdata[0][7]]['item'] .setText(2, rdata[1]['upgRate'])
                 self.node['node'][rdata[0][7]]['item'] .setText(3, rdata[1]['bpFlag'])
                 self.ui.treeWidget_node.resizeColumnToContents(2)
                 self.ui.treeWidget_node.resizeColumnToContents(3)
@@ -449,3 +449,7 @@ class MainWindow(QMainWindow):
             self.ui.plainTextEdit_log.appendPlainText('Tx:'+' '.join(['%02X'%i for i in pkt]))
         else:
             self.ui.plainTextEdit_log.appendPlainText('[rdbg]read xdata: Need select a node.')
+            
+    @pyqtSlot(int)
+    def on_comboBox_chnlgrp_currentIndexChanged(self, index):
+        self.conn.send(['setchnlgrp', index])

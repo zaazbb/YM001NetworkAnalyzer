@@ -24,15 +24,8 @@ def worker(conn, port):
         #conn.send(['err', "can't open %s" % port])
         conn.send(['err', traceback.format_exc()])
     buf = bytearray()
-    #ser.write(b'\xFE\xFE\xFE\xFE\x03\x32\x01\x30')
-    #ser.write(b'\xFE\xFE\xFE\xFE\x03\x33\x01\x31')
-    #FE FE FE FE 03 19 01 1B
-    #ser.write(b'\xFE\xFE\xFE\xFE\x03\x19\x01\x1B')
-    ser.write(b'\xFE\xFE\xFE\xFE\x03\x0E\x01\x1B')
-    #ser.write(b'\xFE\xFE\xFE\xFE\x03\x01\x01\x1B')
-    #ser.write(b'\xFE\xFE\xFE\xFE\x03\x18\x01\x1B')
     
-    #flog = open('pkt.log',  'w')
+    flog = open('pkt.log',  'w')
     #f = open('pkt.bin', 'wb')
     
     frame_index = 0
@@ -49,19 +42,15 @@ def worker(conn, port):
                 conn.send(['err', traceback.format_exc()])
             #buf.extend(ser.read())
             #print(ser.read(ser.in_waiting))
-            #print('<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<',  file=flog, flush=True)
-            #print(' '.join('%02X'%ii for ii in buf),  file=flog, flush=True)
-            #print('>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>',  file=flog, flush=True)
+            print('+++ ', ' '.join('%02X'%ii for ii in buf),  file=flog, flush=True)
             i = buf.find(b'\xFE\xFE\xFE\xFE')
             if i != -1:
                 # from wl, no crc.
                 if len(buf) > i+4 and len(buf)>= i + buf[i+4] + 5:
                     t = datetime.now().strftime('%H:%M:%S %f')
-                    #print(' '.join('%02X'%ii for ii in buf[i+8: i+buf[i+4]+5]),  file=flog, flush=True)
-                    #print(' '.join('%02X'%ii for ii in buf[i: i+buf[i+4]+5]),  file=flog, flush=True)
                     try:
-                        #print(buf[i:i+8])
                         pktstr = ' '.join('%02X'%ii for ii in buf[i+8: i+buf[i+4]+5])
+                        print('--- ', pktstr,  file=flog, flush=True)
                         #print(pktstr)
                         baseinfo, extinfo = PacketParser(buf[i+8: i+buf[i+4]+5])
                         baseinfo[0:0] = [str(t), 'plc' if buf[i+5] == 0xFF else '%02i-%i'%divmod(buf[i+5], 2)]
@@ -69,8 +58,10 @@ def worker(conn, port):
                     except:
                         #conn.send(['err', 'parsePktError:' + pktstr])
                         #print('-'.join('%02X'%ii for ii in buf[i: i+buf[i+4]+5]),  file=flog, flush=True)
-                        conn.send(['err', traceback.format_exc()])
-                        #print(pktstr)
+                        errinfo = traceback.format_exc()
+                        conn.send(['err', errinfo])
+                        print(errinfo,  file=flog, flush=True)
+                        print(pktstr)
                     del buf[: i+buf[i+4]+5]
         if conn.poll():
             msg = conn.recv()
@@ -89,7 +80,13 @@ def worker(conn, port):
                     if frame_index == 256:
                         frame_index = 0
                 except:
-                    conn.send(['err', traceback.format_exc()])                
+                    conn.send(['err', traceback.format_exc()])     
+            elif msg[0] == 'setchnlgrp':
+                pkt = bytearray(b'\xFE\xFE\xFE\xFE\x03\x0E\x01\x1B')
+                pkt[5] = msg[1]
+                pkt[7] = pkt[4] ^ pkt[5] ^ pkt[6]
+                ser.write(pkt)
+                #print('workgroup set to ',  msg[1])
             elif msg[0] == 'parsepkt':
                 try:
                     pktstr = ' '.join('%02X'%i for i in msg[1])
