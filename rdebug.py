@@ -35,7 +35,7 @@ def _chk_xor(d):
     return xor
     
 def mk_rxval(dst, src, index, addr, len):
-    template = '43 CD 0F FF FF 45 30 10 03 00 00 55 44 33 22 11 00 F1 00 01 04 00 4A 21 80'
+    template = '43 CD 0F FF FF 45 30 10 03 00 00 55 44 33 22 11 00 F1 06 00 01 00 4A 21 80'
     pkt = bytearray.fromhex(template)
     i = 5
     srcaddr = bytearray.fromhex(dst)
@@ -46,14 +46,14 @@ def mk_rxval(dst, src, index, addr, len):
     srcaddr.reverse()
     pkt[i:i+6] = srcaddr
     i += 6
-    i += 1
+    i += 2
     pkt[i] = index % 0x80
-    i += 4
+    i += 3
     pkt[i:i+2] = addr.to_bytes(2, 'little')
     i += 2
     pkt[i] = len
     i += 1
-    pkt.append(sum(pkt[i-4:i]) % 0x100)
-    pkt.append(_chk_xor(pkt[i-4:i]))
+    pkt.append(sum(pkt[i-6:i]) % 0x100)
+    pkt.append(_chk_xor(pkt[i-6:i]))
     
     return pkt

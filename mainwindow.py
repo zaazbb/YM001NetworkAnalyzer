@@ -139,7 +139,7 @@ class MainWindow(QMainWindow):
                 self.node['node'][rdata[0][7]]['item'] .setText(3, rdata[1]['bpFlag'])
                 self.ui.treeWidget_node.resizeColumnToContents(2)
                 self.ui.treeWidget_node.resizeColumnToContents(3)
-        elif rdata[0][2] == 'mcRdbg':
+        elif rdata[0][2] == 'mcDbgRwmem':
             if rdata[0][7] in self.node['node']:
                 self.ui.plainTextEdit_rdbgresp.setPlainText(rdata[1]['dat'])
         
