@@ -81,6 +81,9 @@ class MainWindow(QMainWindow):
         for i in self.rdbglst:
             item = QTreeWidgetItem(None, [i[0], '%04X'%i[1],  str(i[2])])
             self.ui.treeWidget_rdbglst.addTopLevelItem(item)
+            if i[0] == 'gParamData':
+                self.ui.treeWidget_rdbglst.setCurrentItem(item)
+                self.on_treeWidget_rdbglst_itemClicked(item, 0)
         for i in range(self.ui.treeWidget_rdbglst.columnCount()):
              self.ui.treeWidget_rdbglst.resizeColumnToContents(i)
         self.rdbgidx = 0
@@ -101,7 +104,7 @@ class MainWindow(QMainWindow):
                 self.timer = QTimer(self)
                 self.timer.timeout.connect(self.update)
                 self.timer.start(100)     
-                self.upgsrcaddr = self.config['upgrade']['srcaddr'][:12].zfill(12)
+                self.upgsrc = self.config['upgrade']['srcaddr'][:12].zfill(12)
                 self.upgtimer = QTimer(self)
                 self.upgtimer.setSingleShot(True)
                 self.upgtimer.timeout.connect(self.upgrade)
@@ -139,7 +142,7 @@ class MainWindow(QMainWindow):
                 self.node['node'][rdata[0][7]]['item'] .setText(3, rdata[1]['bpFlag'])
                 self.ui.treeWidget_node.resizeColumnToContents(2)
                 self.ui.treeWidget_node.resizeColumnToContents(3)
-        elif rdata[0][2] == 'mcDbgRwmem':
+        elif rdata[0][2].startswith('mcDbg'):
             if rdata[0][7] in self.node['node']:
                 self.ui.plainTextEdit_rdbgresp.setPlainText(rdata[1]['dat'])
         
@@ -246,7 +249,7 @@ class MainWindow(QMainWindow):
         for item in self.ui.treeWidget_node.selectedItems():
             addr = item.text(0)
             if addr in self.node['node']:
-                self.txpkt.append(upgrade.mk_rdsncfg(addr, self.upgsrcaddr))
+                self.txpkt.append(upgrade.mk_rdsncfg(addr, self.upgsrc))
                 item.setText(1, '')
         if self.txpkt:
             self.txtimer.start(1000)
@@ -260,17 +263,28 @@ class MainWindow(QMainWindow):
         for item in self.ui.treeWidget_node.selectedItems():
             addr = item.text(0)
             if addr in self.node['node']:
-                self.txpkt.append(upgrade.mk_bpsts(addr, self.upgsrcaddr))
+                self.txpkt.append(upgrade.mk_bpsts(addr, self.upgsrc))
                 item.setText(2, '')
                 item.setText(3, '')
         if self.txpkt:
             self.txtimer.start(1000)
 
     @pyqtSlot()
+    def on_actionRdbgPoolType_triggered(self):
+        self.ui.plainTextEdit_rdbgresp.setPlainText('') 
+        items = self.ui.treeWidget_node.selectedItems()     
+        if items:
+            addr = items[0].text(0)
+            self.rdbgidx += 1
+            pkt = rdebug.mk_pooltype(addr, self.upgsrc, self.rdbgidx % 128)
+            self.conn.send(['send',  0x80, pkt])
+            self.ui.plainTextEdit_log.appendPlainText('Tx:'+' '.join(['%02X'%i for i in pkt]))
+
+    @pyqtSlot()
     def on_actionUpgTxm_triggered(self):
         items=self.ui.treeWidget_node.selectedItems()     
         addr = items[0].text(0)
-        pkt = upgrade.mk_chng2txm(addr, self.upgsrcaddr)
+        pkt = upgrade.mk_chng2txm(addr, self.upgsrc)
         self.conn.send(['send',  0x80, pkt])
         self.ui.plainTextEdit_log.appendPlainText('Tx:'+' '.join(['%02X'%i for i in pkt]))
             
@@ -278,7 +292,7 @@ class MainWindow(QMainWindow):
     def on_actionUpgRdBack_triggered(self):
         items=self.ui.treeWidget_node.selectedItems()     
         addr = items[0].text(0)
-        pkt = upgrade.mk_readback(addr, self.upgsrcaddr)
+        pkt = upgrade.mk_readback(addr, self.upgsrc)
         self.conn.send(['send',  0x80, pkt])
         self.ui.plainTextEdit_log.appendPlainText('Tx:'+' '.join(['%02X'%i for i in pkt]))
 
@@ -295,17 +309,27 @@ class MainWindow(QMainWindow):
             popMenu =QMenu(self)
             popMenu.addAction(self.ui.actionRdSnCfg)
             popMenu.addAction(self.ui.actionUpgBpSts)
+            popMenu.addAction(self.ui.actionRdbgPoolType)
             popMenu.addSeparator()
             popMenu.addAction(self.ui.actionUpgTxm)  
             popMenu.addSeparator()
             popMenu.addAction(self.ui.actionUpgRdBack)  
             popMenu.popup(QCursor.pos())
-        
+
     @pyqtSlot()
     def on_pushButton_upgrade_clicked(self):
         if self.txtimer.isActive() or self.upgtimer.isActive():
             self.ui.plainTextEdit_log.appendPlainText('Tx busy.')
             return
+        if self.ui.checkBox_bcast.isChecked():
+            self.upgdst = 'FFFFFFFFFFFF'
+        else:
+            items = self.ui.treeWidget_node.selectedItems()    
+            if len(items) == 1:
+                self.upgdst = items[0].text(0)
+            else:
+                self.ui.plainTextEdit_log.appendPlainText('[upg]Please select only one node.')
+                return
         self.upgrdbplst = []
         self.upgi = 0
         self.upgdata = upgrade.get_app_code(self.config['upgrade']['file'])
@@ -334,7 +358,7 @@ class MainWindow(QMainWindow):
             self.node['node'][node]['bpFlag'] = ''
             self.node['node'][node]['item'] .setText(2, '')
             self.node['node'][node]['item'] .setText(3, '')
-            pkt = upgrade.mk_bpsts(node, self.upgsrcaddr)
+            pkt = upgrade.mk_bpsts(node, self.upgsrc)
             self.conn.send(['send',  0x80, pkt])
             self.ui.plainTextEdit_log.appendPlainText('Tx:'+' '.join(['%02X'%i for i in pkt]))
             self.upgi += 1
@@ -347,7 +371,7 @@ class MainWindow(QMainWindow):
             if self.upgsts == 0:
                 self.ui.plainTextEdit_log.appendPlainText('[upgrade]switch upgrade rxd mode.')
                 #print('[upgrade]switch upgrade rxd mode.')
-                pkt = upgrade.mk_upg02(self.upgsrcaddr, self.upgflen, self.upgsver, self.upgcrc)
+                pkt = upgrade.mk_upg02(self.upgdst, self.upgsrc, self.upgflen, self.upgsver, self.upgcrc)
                 self.conn.send(['send',  0x80, pkt]) 
                 #self.ui.plainTextEdit_log.appendPlainText('Tx:'+' '.join(['%02X'%i for i in pkt]))
                 #print('Tx:'+' '.join(['%02X'%i for i in pkt]))
@@ -364,7 +388,8 @@ class MainWindow(QMainWindow):
                     if self.upgbpflag[i] == '0':
                         #self.ui.plainTextEdit_log.appendPlainText('[upgrade]send packet %i.' % i)
                         #print('[upgrade]: send packet %i.' % i)
-                        pkt = upgrade.mk_upg04(self.upgsrcaddr, self.upgflen, self.upgcrc, i+1, self.upgdata[i*128:i*128+128])
+                        pkt = upgrade.mk_upg04(
+                            self.upgdst,  self.upgsrc, self.upgflen, self.upgcrc, i+1, self.upgdata[i*128:i*128+128])
                         self.conn.send(['send',  0x80, pkt]) 
                         #self.ui.plainTextEdit_log.appendPlainText('Tx:'+' '.join(['%02X'%ii for ii in pkt]))
                         #print('Tx:'+' '.join(['%02X'%ii for ii in pkt]))
@@ -377,7 +402,10 @@ class MainWindow(QMainWindow):
                 else:
                     if self.ui.checkBox_upgauto.isChecked():
                         self.upgi = 0
-                        self.upgrdbplst = list(self.node['node'].keys())
+                        if self.upgdst == 'FFFFFFFFFFFF':
+                            self.upgrdbplst = list(self.node['node'].keys())
+                        else:
+                            self.upgrdbplst =[self.upgdst]
                         self.upgtimer.start(500)
                     else:
                         self.ui.plainTextEdit_log.appendPlainText('[upgrade]upgrade finished.')
@@ -386,11 +414,17 @@ class MainWindow(QMainWindow):
                 self.upgsts = 0
                 self.upgi = 0
                 totbpflag = bytearray(b'\xFF' * 64)
-                for node in self.node['node']:
-                    if self.node['node'][node]['bpFlag']:
-                        bpflag = bytes.fromhex(self.node['node'][node]['bpFlag'])
-                        for i in range(64):
-                            totbpflag[i] &= bpflag[i]
+                if self.upgdst == 'FFFFFFFFFFFF':
+                    for node in self.node['node']:
+                        if self.node['node'][node]['bpFlag']:
+                            bpflag = bytes.fromhex(self.node['node'][node]['bpFlag'])
+                            for i in range(64):
+                                totbpflag[i] &= bpflag[i]
+                else:
+                    if self.upgdst in self.node['node'] and self.node['node'][self.upgdst]['bpFlag']:
+                            bpflag = bytes.fromhex(self.node['node'][self.upgdst]['bpFlag'])
+                            for i in range(64):
+                                totbpflag[i] &= bpflag[i]
                 self.upgbpflag = []
                 for i in range(64):
                     flag = list('{:08b}'.format(totbpflag[i]))
@@ -439,11 +473,11 @@ class MainWindow(QMainWindow):
     @pyqtSlot()
     def on_pushButton_rdbgsend_clicked(self):
         self.ui.plainTextEdit_rdbgresp.setPlainText('')
-        items = self.ui.treeWidget_node.selectedItems()     
+        items = self.ui.treeWidget_node.selectedItems()    
         if items:
             addr = items[0].text(0)
             self.rdbgidx += 1
-            pkt = rdebug.mk_rxval(addr, self.upgsrcaddr, self.rdbgidx % 128, 
+            pkt = rdebug.mk_rxval(addr, self.upgsrc, self.rdbgidx % 128, 
                 int(self.ui.label_rdbgaddr.text(), 16), self.ui.spinBox_rdbglen.value())
             self.conn.send(['send',  0x80, pkt])
             self.ui.plainTextEdit_log.appendPlainText('Tx:'+' '.join(['%02X'%i for i in pkt]))

@@ -157,6 +157,9 @@ class Ui_MainWindow(object):
         self.progressBar_upgrade.setProperty("value", 0)
         self.progressBar_upgrade.setObjectName("progressBar_upgrade")
         self.horizontalLayout_2.addWidget(self.progressBar_upgrade)
+        self.checkBox_bcast = QtWidgets.QCheckBox(self.tab_2)
+        self.checkBox_bcast.setObjectName("checkBox_bcast")
+        self.horizontalLayout_2.addWidget(self.checkBox_bcast)
         self.checkBox_upgauto = QtWidgets.QCheckBox(self.tab_2)
         self.checkBox_upgauto.setObjectName("checkBox_upgauto")
         self.horizontalLayout_2.addWidget(self.checkBox_upgauto)
@@ -167,6 +170,7 @@ class Ui_MainWindow(object):
         self.pushButton_upgrade.setEnabled(False)
         self.pushButton_upgrade.setObjectName("pushButton_upgrade")
         self.horizontalLayout_2.addWidget(self.pushButton_upgrade)
+        self.horizontalLayout_2.setStretch(0, 1)
         self.verticalLayout_4.addLayout(self.horizontalLayout_2)
         self.tabWidget.addTab(self.tab_2, "")
         self.plainTextEdit_log = QtWidgets.QPlainTextEdit(self.splitter)
@@ -189,6 +193,8 @@ class Ui_MainWindow(object):
         self.actionRmParsed.setObjectName("actionRmParsed")
         self.actionClear = QtWidgets.QAction(MainWindow)
         self.actionClear.setObjectName("actionClear")
+        self.actionRdbgPoolType = QtWidgets.QAction(MainWindow)
+        self.actionRdbgPoolType.setObjectName("actionRdbgPoolType")
 
         self.retranslateUi(MainWindow)
         self.tabWidget.setCurrentIndex(0)
@@ -261,9 +267,10 @@ class Ui_MainWindow(object):
         self.label_rdbgaddr.setText(_translate("MainWindow", "addr"))
         self.pushButton_rdbgsend.setText(_translate("MainWindow", "Send"))
         self.progressBar_upgrade.setFormat(_translate("MainWindow", "%v/%m"))
+        self.checkBox_bcast.setText(_translate("MainWindow", "bcast"))
         self.checkBox_upgauto.setToolTip(_translate("MainWindow", "after chngm&send,auto readbp & calcbp,and reloop,until bp is allone."))
         self.checkBox_upgauto.setText(_translate("MainWindow", "auto"))
-        self.checkBox_usebp.setToolTip(_translate("MainWindow", "used when aoto is unchecked.calcbp before chngm&send."))
+        self.checkBox_usebp.setToolTip(_translate("MainWindow", "used when auto is unchecked.calcbp before chngm&send."))
         self.checkBox_usebp.setText(_translate("MainWindow", "usebp"))
         self.pushButton_upgrade.setText(_translate("MainWindow", "upgrade"))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_2), _translate("MainWindow", "node"))
@@ -275,6 +282,7 @@ class Ui_MainWindow(object):
         self.actionUpgRdBack.setText(_translate("MainWindow", "upgRdBack"))
         self.actionRmParsed.setText(_translate("MainWindow", "rmParsed"))
         self.actionClear.setText(_translate("MainWindow", "clear"))
+        self.actionRdbgPoolType.setText(_translate("MainWindow", "rdbgPoolType"))
 
 
 if __name__ == "__main__":

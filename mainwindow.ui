@@ -485,7 +485,7 @@
           </layout>
          </item>
          <item>
-          <layout class="QHBoxLayout" name="horizontalLayout_2">
+          <layout class="QHBoxLayout" name="horizontalLayout_2" stretch="1,0,0,0,0">
            <item>
             <widget class="QProgressBar" name="progressBar_upgrade">
              <property name="value">
@@ -493,6 +493,13 @@
              </property>
              <property name="format">
               <string>%v/%m</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QCheckBox" name="checkBox_bcast">
+             <property name="text">
+              <string>bcast</string>
              </property>
             </widget>
            </item>
@@ -509,7 +516,7 @@
            <item>
             <widget class="QCheckBox" name="checkBox_usebp">
              <property name="toolTip">
-              <string>used when aoto is unchecked.calcbp before chngm&amp;send.</string>
+              <string>used when auto is unchecked.calcbp before chngm&amp;send.</string>
              </property>
              <property name="text">
               <string>usebp</string>
@@ -574,6 +581,11 @@
   <action name="actionClear">
    <property name="text">
     <string>clear</string>
+   </property>
+  </action>
+  <action name="actionRdbgPoolType">
+   <property name="text">
+    <string>rdbgPoolType</string>
    </property>
   </action>
  </widget>
