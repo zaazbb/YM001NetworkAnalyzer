@@ -195,6 +195,8 @@ class Ui_MainWindow(object):
         self.actionClear.setObjectName("actionClear")
         self.actionRdbgPoolType = QtWidgets.QAction(MainWindow)
         self.actionRdbgPoolType.setObjectName("actionRdbgPoolType")
+        self.actionEraseParam = QtWidgets.QAction(MainWindow)
+        self.actionEraseParam.setObjectName("actionEraseParam")
 
         self.retranslateUi(MainWindow)
         self.tabWidget.setCurrentIndex(0)
@@ -283,6 +285,7 @@ class Ui_MainWindow(object):
         self.actionRmParsed.setText(_translate("MainWindow", "rmParsed"))
         self.actionClear.setText(_translate("MainWindow", "clear"))
         self.actionRdbgPoolType.setText(_translate("MainWindow", "rdbgPoolType"))
+        self.actionEraseParam.setText(_translate("MainWindow", "eraseParam"))
 
 
 if __name__ == "__main__":

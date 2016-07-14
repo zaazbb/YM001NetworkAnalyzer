@@ -274,8 +274,8 @@ def PacketParser(pkt):
             cmdinfo['dir'] = 'up' if pkt[i]&0x80 else 'down'
             cmdinfo['index'] = str(pkt[i] & 0x7F)
             i += 1
-            rdbgtype = ('mcDbgRwmem', 'mcDbgRbt', 'mcDbgWgpam', 'mcDbgPltyp')
-            baseinfo[0] = cmdinfo['cmd'] = rdbgtype[pkt[i]-1] if pkt[i] in range(1, 5) else 'mcDbgRsv'
+            rdbgtype = ('mcDbgRsv', 'mcDbgRwmem', 'mcDbgRbt', 'mcDbgWgpam', 'mcDbgPltyp', 'mcEraseP')
+            baseinfo[0] = cmdinfo['cmd'] = rdbgtype[pkt[i]] if pkt[i] in range(len(rdbgtype)) else 'mcDbgRsv'
             i += 1
             cmdinfo['dat'] = ' '.join('%02X'%ii for ii in pkt[i:-2])
         else:

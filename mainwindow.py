@@ -281,6 +281,17 @@ class MainWindow(QMainWindow):
             self.ui.plainTextEdit_log.appendPlainText('Tx:'+' '.join(['%02X'%i for i in pkt]))
 
     @pyqtSlot()
+    def on_actionEraseParam_triggered(self):
+        self.ui.plainTextEdit_rdbgresp.setPlainText('') 
+        items = self.ui.treeWidget_node.selectedItems()     
+        if items:
+            addr = items[0].text(0)
+            self.rdbgidx += 1
+            pkt = rdebug.mk_eraseparam(addr, self.upgsrc, self.rdbgidx % 128)
+            self.conn.send(['send',  0x80, pkt])
+            self.ui.plainTextEdit_log.appendPlainText('Tx:'+' '.join(['%02X'%i for i in pkt]))
+
+    @pyqtSlot()
     def on_actionUpgTxm_triggered(self):
         items=self.ui.treeWidget_node.selectedItems()     
         addr = items[0].text(0)
@@ -310,6 +321,8 @@ class MainWindow(QMainWindow):
             popMenu.addAction(self.ui.actionRdSnCfg)
             popMenu.addAction(self.ui.actionUpgBpSts)
             popMenu.addAction(self.ui.actionRdbgPoolType)
+            popMenu.addSeparator()
+            popMenu.addAction(self.ui.actionEraseParam)
             popMenu.addSeparator()
             popMenu.addAction(self.ui.actionUpgTxm)  
             popMenu.addSeparator()
@@ -397,7 +410,10 @@ class MainWindow(QMainWindow):
                         max = self.ui.progressBar_upgrade.maximum()
                         self.ui.progressBar_upgrade.setValue(max - self.upgbpflag.count('0'))
                         self.upgi = i+1
-                        self.upgtimer.start(500)
+                        if self.upgdst == 'FFFFFFFFFFFF':
+                            self.upgtimer.start(300)
+                        else:
+                            self.upgtimer.start(500)
                         break
                 else:
                     if self.ui.checkBox_upgauto.isChecked():

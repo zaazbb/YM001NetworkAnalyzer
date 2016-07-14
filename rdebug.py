@@ -77,3 +77,23 @@ def mk_pooltype(dst, src, index):
     pkt.append(_chk_xor(pkt[i-2:i]))
     
     return pkt
+    
+def mk_eraseparam(dst, src, index):
+    template = '43 CD 00 FF FF 33 21 10 03 00 00 66 55 44 33 22 11 F1 02 01 05'
+    pkt = bytearray.fromhex(template)
+    i = 5
+    srcaddr = bytearray.fromhex(dst)
+    srcaddr.reverse()
+    pkt[i:i+6] = srcaddr
+    i += 6
+    srcaddr = bytearray.fromhex(src)
+    srcaddr.reverse()
+    pkt[i:i+6] = srcaddr
+    i += 6
+    i += 2
+    pkt[i] = index % 0x80
+    i += 2
+    pkt.append(sum(pkt[i-2:i]) % 0x100)
+    pkt.append(_chk_xor(pkt[i-2:i]))
+    
+    return pkt

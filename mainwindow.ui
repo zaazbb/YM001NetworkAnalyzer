@@ -588,6 +588,11 @@
     <string>rdbgPoolType</string>
    </property>
   </action>
+  <action name="actionEraseParam">
+   <property name="text">
+    <string>eraseParam</string>
+   </property>
+  </action>
  </widget>
  <resources/>
  <connections/>
