@@ -480,10 +480,9 @@ class MainWindow(QMainWindow):
     @pyqtSlot(QTreeWidgetItem, int)
     def on_treeWidget_rdbglst_itemClicked(self, item, column):
         row = self.ui.treeWidget_rdbglst.indexOfTopLevelItem(item)
-        self.ui.label_rdbgaddr.setText('0x%04X' % self.rdbglst[row][1])
+        self.ui.spinBox_rdbgaddr.setValue(self.rdbglst[row][1])
         len = self.rdbglst[row][2]
         val = len if len < 128 else 128
-        self.ui.spinBox_rdbglen.setMaximum(val)
         self.ui.spinBox_rdbglen.setValue(val)
 
     @pyqtSlot()
@@ -494,7 +493,7 @@ class MainWindow(QMainWindow):
             addr = items[0].text(0)
             self.rdbgidx += 1
             pkt = rdebug.mk_rxval(addr, self.upgsrc, self.rdbgidx % 128, 
-                int(self.ui.label_rdbgaddr.text(), 16), self.ui.spinBox_rdbglen.value())
+                self.ui.spinBox_rdbgaddr.value(), self.ui.spinBox_rdbglen.value())
             self.conn.send(['send',  0x80, pkt])
             self.ui.plainTextEdit_log.appendPlainText('Tx:'+' '.join(['%02X'%i for i in pkt]))
         else:

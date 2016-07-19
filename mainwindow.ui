@@ -434,11 +434,24 @@
               </widget>
              </item>
              <item>
-              <layout class="QHBoxLayout" name="horizontalLayout_4" stretch="0,0,0">
+              <layout class="QHBoxLayout" name="horizontalLayout_4" stretch="0,1,1,0">
                <item>
-                <widget class="QLabel" name="label_rdbgaddr">
+                <widget class="QLabel" name="label_2">
                  <property name="text">
-                  <string>addr</string>
+                  <string>0x</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QSpinBox" name="spinBox_rdbgaddr">
+                 <property name="minimum">
+                  <number>0</number>
+                 </property>
+                 <property name="maximum">
+                  <number>32767</number>
+                 </property>
+                 <property name="displayIntegerBase">
+                  <number>16</number>
                  </property>
                 </widget>
                </item>
