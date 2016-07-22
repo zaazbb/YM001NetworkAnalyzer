@@ -167,6 +167,8 @@ class MainWindow(QMainWindow):
                         self.ui.treeWidget.scrollToBottom()
                 for i in range(self.ui.treeWidget.columnCount()):
                      self.ui.treeWidget.resizeColumnToContents(i)
+            elif msg[0] == 'msg':
+                self.ui.plainTextEdit_log.appendPlainText('[msg]%s' % msg[1])
             elif msg[0] == 'err':
                 self.ui.plainTextEdit_log.appendPlainText(msg[1])
             
@@ -502,3 +504,4 @@ class MainWindow(QMainWindow):
     @pyqtSlot(int)
     def on_comboBox_chnlgrp_currentIndexChanged(self, index):
         self.conn.send(['setchnlgrp', index])
+        self.ui.plainTextEdit_log.appendPlainText('[msg]channel group set to %i.' % index)

@@ -152,7 +152,7 @@ class Ui_MainWindow(object):
         self.horizontalLayout_4.setStretch(2, 1)
         self.verticalLayout_3.addLayout(self.horizontalLayout_4)
         self.plainTextEdit_rdbgresp = QtWidgets.QPlainTextEdit(self.tab_2)
-        self.plainTextEdit_rdbgresp.setMaximumSize(QtCore.QSize(16777215, 100))
+        self.plainTextEdit_rdbgresp.setMaximumSize(QtCore.QSize(16777215, 120))
         self.plainTextEdit_rdbgresp.setPlainText("")
         self.plainTextEdit_rdbgresp.setObjectName("plainTextEdit_rdbgresp")
         self.verticalLayout_3.addWidget(self.plainTextEdit_rdbgresp)
