@@ -92,6 +92,9 @@ def bitrate(dat, bitn):
                 bits += 1
     return '%.2f%%' % (bits*100/bitn)
     
+def parse_sver(sverd):
+         return '%d.%d.%d' % (sverd[2], sverd[1], sverd[0])
+    
 
 def PacketParser(pkt):
 #    print(' '.join('%02X' % i for i in pkt))
@@ -185,8 +188,9 @@ def PacketParser(pkt):
                 i += 1
                 cmdinfo['fileLen'] = str(int.from_bytes(pkt[i:i+2], 'little'))
                 i += 2
-                cmdinfo['sVer'] = reverse_hex(pkt[i:i+2])
-                i += 2
+                cmdinfo['sVerD'] = reverse_hex(pkt[i:i+3])
+                cmdinfo['sVer'] = parse_sver(pkt[i:i+3])
+                i += 3
                 cmdinfo['crc'] = reverse_hex(pkt[i:i+4])
                 i += 4
                 cmdinfo['checkCode'] = ' '.join(['%02X'%i for i in pkt[i:i+16]])
@@ -361,7 +365,8 @@ def PacketParser(pkt):
                 i += 1
                 cmdinfo['hVer'] =  reverse_hex(pkt[i:i+2])
                 i += 2
-                cmdinfo['sVer'] =   reverse_hex(pkt[i:i+3])
+                cmdinfo['sVerD'] =   reverse_hex(pkt[i:i+3])
+                cmdinfo['sVer'] = parse_sver(pkt[i:i+3])
             elif pkt[i] == 0x16:
                 # fNdRdy
                 i += 1
@@ -636,7 +641,8 @@ def aps_read_node_config(p):
     i += 2
     info['hVer'] = reverse_hex(p[i:i+2])
     i += 2
-    info['sVer'] = reverse_hex(p[i:i+3])
+    info['sVerD'] = reverse_hex(p[i:i+3])
+    info['sVer'] = parse_sver(p[i:i+3])
     i += 3
     info['tsmtPower'] = ApsTsmtPower.get(p[i], '--')
     i += 1

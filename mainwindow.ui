@@ -498,6 +498,54 @@
           </layout>
          </item>
          <item>
+          <layout class="QHBoxLayout" name="horizontalLayout_6" stretch="0,0,0,0,1">
+           <item>
+            <widget class="QLineEdit" name="lineEdit_curnode">
+             <property name="text">
+              <string>888888888888</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QCheckBox" name="checkBox_rf">
+             <property name="text">
+              <string>RF</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QCheckBox" name="checkBox_plc">
+             <property name="text">
+              <string>PLC</string>
+             </property>
+             <property name="checked">
+              <bool>true</bool>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="pushButton_rfplcsw">
+             <property name="text">
+              <string>RfPlcSwitch</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <spacer name="horizontalSpacer">
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>40</width>
+               <height>20</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+          </layout>
+         </item>
+         <item>
           <layout class="QHBoxLayout" name="horizontalLayout_2" stretch="1,0,0,0,0">
            <item>
             <widget class="QProgressBar" name="progressBar_upgrade">
@@ -573,7 +621,7 @@
   </action>
   <action name="actionUpgTxm">
    <property name="text">
-    <string>upgTxm</string>
+    <string>-upgTxm</string>
    </property>
   </action>
   <action name="actionRdSnCfg">
@@ -583,7 +631,7 @@
   </action>
   <action name="actionUpgRdBack">
    <property name="text">
-    <string>upgRdBack</string>
+    <string>-upgRdBack</string>
    </property>
   </action>
   <action name="actionRmParsed">
@@ -598,12 +646,12 @@
   </action>
   <action name="actionRdbgPoolType">
    <property name="text">
-    <string>rdbgPoolType</string>
+    <string>-rdbgPoolType</string>
    </property>
   </action>
   <action name="actionEraseParam">
    <property name="text">
-    <string>eraseParam</string>
+    <string>-eraseParam</string>
    </property>
   </action>
  </widget>

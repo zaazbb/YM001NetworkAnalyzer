@@ -2,7 +2,7 @@
 import os.path
 import pickle
 from datetime import datetime
-import traceback
+#import traceback
 
 from PyQt5.QtWidgets import QMainWindow, QTreeWidgetItem, QMenu, QFileDialog#, QInputDialog
 from PyQt5.QtGui import QBrush, QCursor
@@ -297,7 +297,7 @@ class MainWindow(QMainWindow):
     def on_actionUpgTxm_triggered(self):
         items=self.ui.treeWidget_node.selectedItems()     
         addr = items[0].text(0)
-        pkt = upgrade.mk_chng2txm(addr, self.upgsrc)
+        pkt = upgrade.mk_chng2txm(addr, self.upgsrc,  not self.ui.checkBox_bcast.isChecked())
         self.conn.send(['send',  0x80, pkt])
         self.ui.plainTextEdit_log.appendPlainText('Tx:'+' '.join(['%02X'%i for i in pkt]))
             
@@ -315,6 +315,10 @@ class MainWindow(QMainWindow):
             self.ui.plainTextEdit_log.appendPlainText('Tx:'+' '.join(['%02X'%i for i in self.txpkt[0]]))
             del self.txpkt[0]
             self.txtimer.start(1000)
+
+    @pyqtSlot(QTreeWidgetItem, int)
+    def on_treeWidget_node_itemClicked(self, item, column):
+        self.ui.lineEdit_curnode.setText(item.text(0))
 
     @pyqtSlot(QPoint)
     def on_treeWidget_node_customContextMenuRequested(self, pos):
@@ -349,7 +353,9 @@ class MainWindow(QMainWindow):
         self.upgi = 0
         self.upgdata = upgrade.get_app_code(self.config['upgrade']['file'])
         self.upgflen = self.upgdata[0x400+2]+self.upgdata[0x400+7]*0x100
-        self.upgsver = int.from_bytes(self.upgdata[0x100:0x100+4], 'big')
+        self.upgsver = int.from_bytes(self.upgdata[0x100:0x104], 'big')
+        self.upghver = int.from_bytes(self.upgdata[0x104:0x106], 'big')
+        self.upgvid = int.from_bytes(self.upgdata[0x106:0x108], 'big')
         self.upgcrc = int.from_bytes(self.upgdata[-4:], 'big')
         # auto = 1, change mode - send data - read bp - calc bp , and loop.
         # auto = 0, change mode - send data.
@@ -386,7 +392,7 @@ class MainWindow(QMainWindow):
             if self.upgsts == 0:
                 self.ui.plainTextEdit_log.appendPlainText('[upgrade]switch upgrade rxd mode.')
                 #print('[upgrade]switch upgrade rxd mode.')
-                pkt = upgrade.mk_upg02(self.upgdst, self.upgsrc, self.upgflen, self.upgsver, self.upgcrc)
+                pkt = upgrade.mk_upg02(self.upgdst, self.upgsrc, self.upgvid, self.upghver, self.upgflen, self.upgsver, self.upgcrc)
                 self.conn.send(['send',  0x80, pkt]) 
                 #self.ui.plainTextEdit_log.appendPlainText('Tx:'+' '.join(['%02X'%i for i in pkt]))
                 #print('Tx:'+' '.join(['%02X'%i for i in pkt]))
@@ -404,7 +410,7 @@ class MainWindow(QMainWindow):
                         #self.ui.plainTextEdit_log.appendPlainText('[upgrade]send packet %i.' % i)
                         #print('[upgrade]: send packet %i.' % i)
                         pkt = upgrade.mk_upg04(
-                            self.upgdst,  self.upgsrc, self.upgflen, self.upgcrc, i+1, self.upgdata[i*128:i*128+128])
+                            self.upgdst,  self.upgsrc, self.upgvid, self.upgflen, self.upgcrc, i+1, self.upgdata[i*128:i*128+128])
                         self.conn.send(['send',  0x80, pkt]) 
                         #self.ui.plainTextEdit_log.appendPlainText('Tx:'+' '.join(['%02X'%ii for ii in pkt]))
                         #print('Tx:'+' '.join(['%02X'%ii for ii in pkt]))
@@ -505,3 +511,18 @@ class MainWindow(QMainWindow):
     def on_comboBox_chnlgrp_currentIndexChanged(self, index):
         self.conn.send(['setchnlgrp', index])
         self.ui.plainTextEdit_log.appendPlainText('[msg]channel group set to %i.' % index)
+
+    @pyqtSlot()
+    def on_pushButton_rfplcsw_clicked(self):
+        rfplc = 0
+        if self.ui.checkBox_rf.isChecked():
+            rfplc += 1
+        if self.ui.checkBox_plc.isChecked():
+            rfplc += 2
+        if rfplc:
+            self.rdbgidx += 1
+            pkt = rdebug.mk_rfplcswitch(self.ui.lineEdit_curnode.text(), self.upgsrc,  self.rdbgidx % 128, rfplc)
+            self.conn.send(['send',  0x80, pkt])
+            self.ui.plainTextEdit_log.appendPlainText('Tx:'+' '.join(['%02X'%i for i in pkt]))
+        else:
+            self.ui.plainTextEdit_log.appendPlainText('[err]must select one in rf and plc.')

@@ -2,8 +2,8 @@
 #import os.path
 
 
-def mk_upg02(dst, src, flen, sver, crc):
-    template = '43 CD 01 FF FF FF FF FF FF FF FF 33 21 10 03 00 00 F0 02 01 00 01 00 02 6E 01 88 77 1D 4D 95 28 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00'
+def mk_upg02(dst, src, vid, hver, flen, sver, crc):
+    template = '43 CD 01 FF FF FF FF FF FF FF FF 33 21 10 03 00 00 F0 02 01 00 01 00 02 6E 01 88 77 66 1D 4D 95 28 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00'
     pkt = bytearray.fromhex(template)
     i = 5
     addr = bytearray.fromhex(dst)
@@ -14,12 +14,16 @@ def mk_upg02(dst, src, flen, sver, crc):
     addr.reverse()
     pkt[i:i+6] = addr
     i += 6
-    i += 7
+    i += 2 # F0 and cmd 02.
+    pkt[i:i+2] = vid.to_bytes(2, 'little')
+    i += 2
+    pkt[i:i+2] = hver.to_bytes(2, 'little')
+    i += 2
+    i += 1 # file type.
     pkt[i:i+2] = flen.to_bytes(2, 'little')
     i += 2
-    sver &= 0xFFFF
-    pkt[i:i+2] = sver.to_bytes(2, 'little')
-    i += 2
+    pkt[i:i+3] = sver.to_bytes(3, 'little')
+    i += 3
     pkt[i:i+4] = crc.to_bytes(4, 'little')
     return pkt
 
@@ -29,7 +33,7 @@ def _chk_xor(d):
         xor ^= i
     return xor
 
-def mk_upg04(dst, src, flen, crc, index, d):
+def mk_upg04(dst, src, vid, flen, crc, index, d):
     template = '43 CD 01 FF FF FF FF FF FF FF FF 33 21 10 03 00 00 F0 04 01 00 6E 01 1D 4D 95 28 01 00 80'
     pkt = bytearray.fromhex(template)
     i = 5
@@ -41,7 +45,9 @@ def mk_upg04(dst, src, flen, crc, index, d):
     addr.reverse()
     pkt[i:i+6] = addr
     i += 6
-    i += 4
+    i += 2 # F0 and cmd 04.
+    pkt[i:i+2] = vid.to_bytes(2, 'little')
+    i += 2
     pkt[i:i+2] = flen.to_bytes(2, 'little')
     i += 2
     pkt[i:i+4] = crc.to_bytes(4, 'little')
@@ -102,17 +108,26 @@ def get_app_code(fcb):
             else:
                 i += length
                 
-def mk_chng2txm(dst, src):
+def mk_chng2txm(dst, src, vid, is_unicast):
     template = '63 CD 01 FF FF 11 11 22 22 33 33 FF FF FF FF FF FF F0 03 01 00 01 FF FF FF FF FF FF 02 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00'
     pkt = bytearray.fromhex(template)
     i = 5
-    addr = bytearray.fromhex(dst)
-    addr.reverse()
-    pkt[i:i+6] = addr
+    dstaddr = bytearray.fromhex(dst)
+    dstaddr.reverse()
+    pkt[i:i+6] = dstaddr
     i += 6
-    addr = bytearray.fromhex(src)
-    addr.reverse()
-    pkt[i:i+6] = addr
+    srcaddr = bytearray.fromhex(src)
+    srcaddr.reverse()
+    pkt[i:i+6] = srcaddr
+    i += 6
+    i += 2 # F0 and cmd 03.
+    pkt[i:i+2] = vid.to_bytes(2, 'little')
+    i += 2
+    if is_unicast:
+        pkt[i] = 0 # 0 - unicast, 1 - bcast.
+        i += 1
+        pkt[i:i+6] = dstaddr
+        #i += 6
     return pkt
     
 def mk_rdsncfg(dst, src):
