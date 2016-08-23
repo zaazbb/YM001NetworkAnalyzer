@@ -53,13 +53,13 @@ def worker(conn, port):
                         ser.write(pkt_chnlgrp)
                         conn.send(['msg', 'channel group set to %i.' % pkt_chnlgrp[5]])
                     else:
-                        t = datetime.now().strftime('%H:%M:%S %f')
+                        t = datetime.now().strftime('%H:%M:%S_%f')[:-3]
                         try:
                             pktstr = ' '.join('%02X'%ii for ii in buf[i+8: i+buf[i+4]+5])
                             print('--- ', pktstr,  file=flog, flush=True)
                             #print(pktstr)
                             baseinfo, extinfo = PacketParser(buf[i+8: i+buf[i+4]+5])
-                            baseinfo[0:0] = [str(t), 'plc' if buf[i+5] == 0xFF else '%02i-%i'%divmod(buf[i+5], 2)]
+                            baseinfo[0:0] = [t, 'plc' if buf[i+5] == 0xFF else '%02i-%i'%divmod(buf[i+5], 2)]
                             conn.send(['pkt', baseinfo, extinfo, pktstr])
                         except:
                             #conn.send(['err', 'parsePktError:' + pktstr])
