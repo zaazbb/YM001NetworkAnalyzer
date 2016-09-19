@@ -1,11 +1,16 @@
 
 import sys
-from multiprocessing import Process, Pipe
+from multiprocessing import Process, Pipe, freeze_support
 
 from worker import worker
 
 
+version = '0.0.1'
+
+
 if __name__ == '__main__':
+    freeze_support()
+    
     conn_file = None
     if len(sys.argv) > 1:
         if sys.argv[1].upper().startswith('COM'):
