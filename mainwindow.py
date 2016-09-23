@@ -5,7 +5,7 @@ from datetime import datetime
 #import traceback
 
 from PyQt5.QtWidgets import QMainWindow, QTreeWidgetItem, QMenu, QFileDialog#, QInputDialog
-from PyQt5.QtGui import QBrush, QCursor
+from PyQt5.QtGui import QBrush, QCursor, QKeyEvent
 from PyQt5.QtCore import QTimer, pyqtSlot, Qt, QPoint
 
 from Ui_mainwindow import Ui_MainWindow
@@ -87,7 +87,7 @@ class MainWindow(QMainWindow):
         for i in range(self.ui.treeWidget_rdbglst.columnCount()):
              self.ui.treeWidget_rdbglst.resizeColumnToContents(i)
         self.rdbgidx = 0
-        self.ui.plainTextEdit_log.keyReleaseEvent = self.keyReleaseEvent
+        self.ui.comboBox_cmd.keyReleaseEvent = self.keyReleaseEvent
         
         self.buf = []
         self.conn = None
@@ -168,7 +168,7 @@ class MainWindow(QMainWindow):
                 for i in range(self.ui.treeWidget.columnCount()):
                      self.ui.treeWidget.resizeColumnToContents(i)
             elif msg[0] == 'msg':
-                self.ui.plainTextEdit_log.appendPlainText('[msg]%s' % msg[1])
+                self.ui.plainTextEdit_log.appendPlainText('[msg]%s.' % msg[1])
             elif msg[0] == 'err':
                 self.ui.plainTextEdit_log.appendPlainText(msg[1])
             
@@ -465,26 +465,7 @@ class MainWindow(QMainWindow):
                 else:
                     self.ui.plainTextEdit_log.appendPlainText('[upgrade]upgrade finished.')
                     #print('[upgrade]upgrade finished.')
-    
-    def keyReleaseEvent(self, e):
-        key = e.key()
-        if key == Qt.Key_Return:
-            text = self.ui.plainTextEdit_log.toPlainText()
-            i =text.rfind('\n', 0, -1)
-            i = 0 if i == -1 else i + 1
-            cmd = text[i:-1].split(maxsplit=2)
-            if len(cmd) > 1:
-                if cmd[0] == 'send':
-                    if self.conn:
-                        try:
-                            cmd[1] = int(cmd[1], 16)
-                            cmd[2] = bytearray.fromhex(cmd[2])
-                            self.conn.send(cmd)
-                            self.ui.plainTextEdit_log.appendPlainText(
-                                '[Tx]chnl(%i) %s.\n' % (cmd[1], ' '.join('%02X'%ii for ii in cmd[2])))
-                        except:
-                            self.ui.plainTextEdit_log.appendPlainText('[error]send data error.\n')
-    
+
     @pyqtSlot(QTreeWidgetItem, int)
     def on_treeWidget_rdbglst_itemClicked(self, item, column):
         row = self.ui.treeWidget_rdbglst.indexOfTopLevelItem(item)
@@ -526,3 +507,20 @@ class MainWindow(QMainWindow):
             self.ui.plainTextEdit_log.appendPlainText('Tx:'+' '.join(['%02X'%i for i in pkt]))
         else:
             self.ui.plainTextEdit_log.appendPlainText('[err]must select one in rf and plc.')
+
+    def keyReleaseEvent(self, e):
+        key = e.key()
+        if key == Qt.Key_Return:
+            cmd = self.ui.comboBox_cmd.currentText().split(maxsplit=2)
+            if len(cmd) > 1:
+                if cmd[0] == 'send':
+                    if self.conn:
+                        try:
+                            cmd[1] = int(cmd[1], 16)
+                            cmd[2] = bytearray.fromhex(cmd[2])
+                            self.conn.send(cmd)
+                            self.ui.plainTextEdit_log.appendPlainText(
+                                '[Tx]chnl(%i) %s.' % (cmd[1], ' '.join('%02X'%ii for ii in cmd[2])))
+                        except:
+                            self.ui.plainTextEdit_log.appendPlainText('[error]send data error.\n')
+            self.ui.comboBox_cmd.setCurrentText('')

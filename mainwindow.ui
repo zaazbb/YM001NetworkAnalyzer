@@ -602,6 +602,13 @@
       <widget class="QPlainTextEdit" name="plainTextEdit_log"/>
      </widget>
     </item>
+    <item>
+     <widget class="QComboBox" name="comboBox_cmd">
+      <property name="editable">
+       <bool>true</bool>
+      </property>
+     </widget>
+    </item>
    </layout>
   </widget>
   <action name="actionSaveAs">

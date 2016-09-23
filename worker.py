@@ -87,7 +87,7 @@ def worker(conn, port):
                         frame_index = 0
                 except:
                     conn.send(['err', traceback.format_exc()])
-                print(' '.join('%02X'%i for i in pkt))
+                #print(' '.join('%02X'%i for i in pkt))
             elif msg[0] == 'setchnlgrp':
                 pkt_chnlgrp [5] = msg[1]
                 pkt_chnlgrp[7] = pkt_chnlgrp[4] ^ pkt_chnlgrp[5] ^ pkt_chnlgrp[6]
