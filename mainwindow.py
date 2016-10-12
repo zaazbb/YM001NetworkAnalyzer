@@ -76,16 +76,17 @@ class MainWindow(QMainWindow):
 #                    submenu.addAction(ii)
 #                menu.addMenu(submenu)
 #        self.ui.pushButton_mkpkt.setMenu(menu)
-        
-        self.rdbglst = rdebug.get_xval(config['rdebug']['mapfile'])
-        for i in self.rdbglst:
-            item = QTreeWidgetItem(None, [i[0], '%04X'%i[1],  str(i[2])])
-            self.ui.treeWidget_rdbglst.addTopLevelItem(item)
-            if i[0] == 'gParamData':
-                self.ui.treeWidget_rdbglst.setCurrentItem(item)
-                self.on_treeWidget_rdbglst_itemClicked(item, 0)
-        for i in range(self.ui.treeWidget_rdbglst.columnCount()):
-             self.ui.treeWidget_rdbglst.resizeColumnToContents(i)
+        if os.path.exists(config['rdebug']['mapfile']):
+            self.rdbglst = rdebug.get_xval(config['rdebug']['mapfile'])
+            for i in self.rdbglst:
+                item = QTreeWidgetItem(None, [i[0], '%04X'%i[1],  str(i[2])])
+                self.ui.treeWidget_rdbglst.addTopLevelItem(item)
+                if i[0] == 'gParamData':
+                    self.ui.treeWidget_rdbglst.setCurrentItem(item)
+                    self.on_treeWidget_rdbglst_itemClicked(item, 0)
+            for i in range(self.ui.treeWidget_rdbglst.columnCount()):
+                 self.ui.treeWidget_rdbglst.resizeColumnToContents(i)
+             
         self.rdbgidx = 0
         self.ui.comboBox_cmd.keyReleaseEvent = self.keyReleaseEvent
         
