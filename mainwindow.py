@@ -4,8 +4,8 @@ import pickle
 from datetime import datetime
 #import traceback
 
-from PyQt5.QtWidgets import QMainWindow, QTreeWidgetItem, QMenu, QFileDialog#, QInputDialog
-from PyQt5.QtGui import QBrush, QCursor, QKeyEvent
+from PyQt5.QtWidgets import QMainWindow, QTreeWidgetItem, QMenu, QFileDialog
+from PyQt5.QtGui import QBrush, QCursor
 from PyQt5.QtCore import QTimer, pyqtSlot, Qt, QPoint
 
 from Ui_mainwindow import Ui_MainWindow
@@ -18,7 +18,7 @@ import rdebug
 
 
 class MainWindow(QMainWindow):
-    def __init__(self, conn_file, nodes, config):
+    def __init__(self, conn_file, nodes, chnlgrp, config):
         super(MainWindow, self).__init__()
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
@@ -57,25 +57,7 @@ class MainWindow(QMainWindow):
         self.ui.treeWidget_node.expandAll()
         for i in range(self.ui.treeWidget_node.columnCount()):
              self.ui.treeWidget_node.resizeColumnToContents(i)
-             
-#        menu = QMenu(self)
-#        for i in ['mBeacon', 'mAck', 
-#                ['mCmd', 'mcNwkMntnReq', 'mcNwkMntnResp', 'mcSoftUpgrade'], 
-#                ['nCmd', 'ncJoinNwkReq', 'ncJoinNwkResp', 'ncRouteErr', 'ncFiGather',  
-#                    'ncFiGatherResp',  'ncCfgSn', 'ncCfgSnResp', 'ncFreeNdRdy'], 
-#                'aAckNack',  
-#                ['aCmd', 'acCfgUart', 'acSetChnlGrp', 'acSetRssi', 'acSetTsmtPower', 
-#                    'acRdNdCfg', 'acDevReboot', 'acSoftUpgrade', 'acBcastTiming'], 
-#                'aRoute', 
-#                'aReport']:
-#            if isinstance(i, str):
-#                menu.addAction(i)
-#            else:
-#                submenu = QMenu(i[0], menu)
-#                for ii in  i[1:]:
-#                    submenu.addAction(ii)
-#                menu.addMenu(submenu)
-#        self.ui.pushButton_mkpkt.setMenu(menu)
+
         if os.path.exists(config['rdebug']['mapfile']):
             self.rdbglst = rdebug.get_xval(config['rdebug']['mapfile'])
             for i in self.rdbglst:
@@ -112,7 +94,7 @@ class MainWindow(QMainWindow):
                 self.txtimer = QTimer(self)
                 self.txtimer.setSingleShot(True)
                 self.txtimer.timeout.connect(self.txpacket)
-                self.ui.comboBox_chnlgrp.setCurrentIndex(config['DEFAULT'].getint('channelgroup'))
+                self.ui.comboBox_chnlgrp.setCurrentIndex(chnlgrp)
             
         
     def load_file(self, file):

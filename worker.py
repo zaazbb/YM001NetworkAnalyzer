@@ -17,9 +17,12 @@ testdata = [
 ]
 
 
-def worker(conn, port):
+def worker(conn, port, bypasstype, chnlgrp):
     try:
-        ser = serial.Serial(port, 38400, timeout=0)
+        if bypasstype == 2:
+            ser = serial.Serial(port, 115200, parity=serial.PARITY_EVEN, timeout=0)
+        else:
+            ser = serial.Serial(port, 38400, timeout=0)
     except:
         #conn.send(['err', "can't open %s" % port])
         conn.send(['err', traceback.format_exc()])
@@ -30,6 +33,8 @@ def worker(conn, port):
     
     frame_index = 0
     pkt_chnlgrp = bytearray(b'\xFE\xFE\xFE\xFE\x03\x0E\x01\x1B')
+    pkt_chnlgrp [5] = chnlgrp
+    pkt_chnlgrp[7] = pkt_chnlgrp[4] ^ pkt_chnlgrp[5] ^ pkt_chnlgrp[6]
         
     while True:
         if ser.in_waiting:
@@ -77,6 +82,9 @@ def worker(conn, port):
                 pkt.extend(msg[2])
                 pkt[4] = len(msg[2]) + 3
                 pkt[5] = msg[1]
+                if bypasstype == 2:
+                    if pkt[5] != 0 and pkt[5] != chnlgrp:
+                        pkt[5] = 0
                 pkt[7] = pkt[4] ^ pkt[5] ^ pkt[6]
                 # crc
                 #pkt.extend(predefined.mkCrcFun('x-25')(pkt[4:]).to_bytes(2, 'little'))
@@ -104,39 +112,3 @@ def worker(conn, port):
             #print(' '.join('%02X'%i for i in pkt))
 
         time.sleep(0.01)
-
-
-#    for i in testdata:
-#        time.sleep(0.5)
-#        d = bytearray.fromhex(i)
-#        print(' '.join('%02X'%ii for ii in d))
-#        t = datetime.now().strftime('%H:%M:%S %f')
-#        baseinfo, extinfo = PacketParser(d)
-#        baseinfo.insert(0, str(t))
-#        conn.send(['pkt', baseinfo, extinfo, ' '.join('%02X'%ii for ii in d)])
-#    
-#    rxded = [0, 0]
-#
-#    while True:
-#        if conn.poll():
-#            payload = conn.recv()
-#            if payload[17:17+2] == b'\xF0\x06':
-#                addr = payload[5:5+6]
-#                addr.reverse()
-#                d = None
-#                if addr == b'\x11' * 6:
-#                    if rxded[0] == 0:
-#                        rxded[0] = 1
-#                        d = bytearray.fromhex('43 CD 01 FF FF FF FF FF FF FF FF 11 11 11 11 11 11 F0 96 6E 01 F5 FD FF FF FF 26 E0 FA FF FF FF 7F FF FE FF FF FF FF FF FF FF FF FF FF FF FF DF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF 3F 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00')
-#                    else:
-#                        rxded[0] = 1
-#                elif addr == bytes.fromhex('000003100063'):
-#                    if rxded[1] == 0:
-#                        rxded[1] = 1
-#                        d = bytearray.fromhex('43 CD 01 FF FF FF FF FF FF FF FF 63 00 10 03 00 00 F0 96 6E 01 FF FF FF F0 0F FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF FF 3F 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00')
-#                if d:
-#                    t = datetime.now().strftime('%H:%M:%S %f')
-#                    baseinfo, extinfo = PacketParser(d)
-#                    baseinfo.insert(0, str(t))
-#                    conn.send(['pkt', baseinfo, extinfo, ' '.join('%02X'%ii for ii in d)])
-#        time.sleep(0.01)

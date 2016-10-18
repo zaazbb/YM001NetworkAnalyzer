@@ -1,31 +1,36 @@
 
 import sys
+import configparser
 from multiprocessing import Process, Pipe, freeze_support
 
 from worker import worker
 
 
-version = '0.0.1'
+version = '0.0.2'
 
 
 if __name__ == '__main__':
     freeze_support()
+
+    config = configparser.ConfigParser()
+    config.read('config.ini')
+    chnlgrp = config['DEFAULT'].getint('channelgroup')
     
     conn_file = None
     if len(sys.argv) > 1:
         if sys.argv[1].upper().startswith('COM'):
-            port = sys.argv[1]
             conn_file, child_conn = Pipe()
-            p = Process(target=worker, args=(child_conn, sys.argv[1]), daemon=True)
+            p = Process(target=worker, 
+                             args=(child_conn, sys.argv[1], 
+                                      config['DEFAULT'].getint('bypass_type'), 
+                                      chnlgrp), 
+                             daemon=True)
             p.start()
         else:
             conn_file = sys.argv[1]
-            
-    import configparser
+
     from collections import OrderedDict
     
-    config = configparser.ConfigParser()
-    config.read('config.ini')
     nodes = {'mnode': ['mnode', ''], 'node': OrderedDict(), 'xnode': {}}
     for i in config['DEFAULT']['nodes'].split(','):
         node = i.split()
@@ -42,7 +47,7 @@ if __name__ == '__main__':
     from mainwindow import MainWindow
     
     app = QApplication(sys.argv)
-    mainWin = MainWindow(conn_file, nodes, config)
+    mainWin = MainWindow(conn_file, nodes, chnlgrp, config)
     mainWin.show()
     
     sys.exit(app.exec_())
