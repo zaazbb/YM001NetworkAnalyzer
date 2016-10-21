@@ -511,6 +511,9 @@
              <property name="text">
               <string>RF</string>
              </property>
+             <property name="checked">
+              <bool>true</bool>
+             </property>
             </widget>
            </item>
            <item>
@@ -562,6 +565,9 @@
              <property name="text">
               <string>bcast</string>
              </property>
+             <property name="checked">
+              <bool>true</bool>
+             </property>
             </widget>
            </item>
            <item>
@@ -571,6 +577,9 @@
              </property>
              <property name="text">
               <string>auto</string>
+             </property>
+             <property name="checked">
+              <bool>true</bool>
              </property>
             </widget>
            </item>
