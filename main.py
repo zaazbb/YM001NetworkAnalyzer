@@ -15,7 +15,8 @@ if __name__ == '__main__':
     config = configparser.ConfigParser()
     config.read('config.ini')
     chnlgrp = config['DEFAULT'].getint('channelgroup')
-    
+    s=config['DEFAULT']['sendchannel']
+
     conn_file = None
     if len(sys.argv) > 1:
         if sys.argv[1].upper().startswith('COM'):

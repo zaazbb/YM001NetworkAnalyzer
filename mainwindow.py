@@ -95,8 +95,9 @@ class MainWindow(QMainWindow):
                 self.txtimer.setSingleShot(True)
                 self.txtimer.timeout.connect(self.txpacket)
                 self.ui.comboBox_chnlgrp.setCurrentIndex(chnlgrp)
-            
-        
+                sendchnls = config['DEFAULT']['sendchannel']
+                self.__sendchnl = int(sendchnls, 16 if sendchnls.startswith('0x') else 10)
+
     def load_file(self, file):
         with open(file, 'rb') as f:
             self.buf = pickle.load(f)
@@ -262,7 +263,7 @@ class MainWindow(QMainWindow):
             addr = items[0].text(0)
             self.rdbgidx += 1
             pkt = rdebug.mk_pooltype(addr, self.upgsrc, self.rdbgidx % 128)
-            self.conn.send(['send',  0x80, pkt])
+            self.conn.send(['send',  self.__sendchnl, pkt])
             self.ui.plainTextEdit_log.appendPlainText('Tx:'+' '.join(['%02X'%i for i in pkt]))
 
     @pyqtSlot()
@@ -273,7 +274,7 @@ class MainWindow(QMainWindow):
             addr = items[0].text(0)
             self.rdbgidx += 1
             pkt = rdebug.mk_eraseparam(addr, self.upgsrc, self.rdbgidx % 128)
-            self.conn.send(['send',  0x80, pkt])
+            self.conn.send(['send',  self.__sendchnl, pkt])
             self.ui.plainTextEdit_log.appendPlainText('Tx:'+' '.join(['%02X'%i for i in pkt]))
 
     @pyqtSlot()
@@ -281,7 +282,7 @@ class MainWindow(QMainWindow):
         items=self.ui.treeWidget_node.selectedItems()     
         addr = items[0].text(0)
         pkt = upgrade.mk_chng2txm(addr, self.upgsrc,  not self.ui.checkBox_bcast.isChecked())
-        self.conn.send(['send',  0x80, pkt])
+        self.conn.send(['send',  self.__sendchnl, pkt])
         self.ui.plainTextEdit_log.appendPlainText('Tx:'+' '.join(['%02X'%i for i in pkt]))
             
     @pyqtSlot()
@@ -289,12 +290,12 @@ class MainWindow(QMainWindow):
         items=self.ui.treeWidget_node.selectedItems()     
         addr = items[0].text(0)
         pkt = upgrade.mk_readback(addr, self.upgsrc)
-        self.conn.send(['send',  0x80, pkt])
+        self.conn.send(['send',  self.__sendchnl, pkt])
         self.ui.plainTextEdit_log.appendPlainText('Tx:'+' '.join(['%02X'%i for i in pkt]))
 
     def txpacket(self):
         if self.txpkt:
-            self.conn.send(['send',  0x80, self.txpkt[0]])
+            self.conn.send(['send',  self.__sendchnl, self.txpkt[0]])
             self.ui.plainTextEdit_log.appendPlainText('Tx:'+' '.join(['%02X'%i for i in self.txpkt[0]]))
             del self.txpkt[0]
             self.txtimer.start(1000)
@@ -363,7 +364,7 @@ class MainWindow(QMainWindow):
             self.node['node'][node]['item'] .setText(2, '')
             self.node['node'][node]['item'] .setText(3, '')
             pkt = upgrade.mk_bpsts(node, self.upgsrc)
-            self.conn.send(['send',  0x80, pkt])
+            self.conn.send(['send',  self.__sendchnl, pkt])
             self.ui.plainTextEdit_log.appendPlainText('Tx:'+' '.join(['%02X'%i for i in pkt]))
             self.upgi += 1
             if self.upgi == len(self.upgrdbplst):
@@ -376,7 +377,7 @@ class MainWindow(QMainWindow):
                 self.ui.plainTextEdit_log.appendPlainText('[upgrade]switch upgrade rxd mode.')
                 #print('[upgrade]switch upgrade rxd mode.')
                 pkt = upgrade.mk_upg02(self.upgdst, self.upgsrc, self.upgvid, self.upghver, self.upgflen, self.upgsver, self.upgcrc)
-                self.conn.send(['send',  0x80, pkt]) 
+                self.conn.send(['send',  self.__sendchnl, pkt]) 
                 #self.ui.plainTextEdit_log.appendPlainText('Tx:'+' '.join(['%02X'%i for i in pkt]))
                 #print('Tx:'+' '.join(['%02X'%i for i in pkt]))
                 self.upgi += 1
@@ -394,7 +395,7 @@ class MainWindow(QMainWindow):
                         #print('[upgrade]: send packet %i.' % i)
                         pkt = upgrade.mk_upg04(
                             self.upgdst,  self.upgsrc, self.upgvid, self.upgflen, self.upgcrc, i+1, self.upgdata[i*128:i*128+128])
-                        self.conn.send(['send',  0x80, pkt]) 
+                        self.conn.send(['send',  self.__sendchnl, pkt]) 
                         #self.ui.plainTextEdit_log.appendPlainText('Tx:'+' '.join(['%02X'%ii for ii in pkt]))
                         #print('Tx:'+' '.join(['%02X'%ii for ii in pkt]))
                         self.upgbpflag[i] = '1'
@@ -466,7 +467,7 @@ class MainWindow(QMainWindow):
             self.rdbgidx += 1
             pkt = rdebug.mk_rxval(addr, self.upgsrc, self.rdbgidx % 128, 
                 self.ui.spinBox_rdbgaddr.value(), self.ui.spinBox_rdbglen.value())
-            self.conn.send(['send',  0x80, pkt])
+            self.conn.send(['send',  self.__sendchnl, pkt])
             self.ui.plainTextEdit_log.appendPlainText('Tx:'+' '.join(['%02X'%i for i in pkt]))
         else:
             self.ui.plainTextEdit_log.appendPlainText('[rdbg]read xdata: Need select a node.')
@@ -486,7 +487,7 @@ class MainWindow(QMainWindow):
         if rfplc:
             self.rdbgidx += 1
             pkt = rdebug.mk_rfplcswitch(self.ui.lineEdit_curnode.text(), self.upgsrc,  self.rdbgidx % 128, rfplc)
-            self.conn.send(['send',  0x80, pkt])
+            self.conn.send(['send',  self.__sendchnl, pkt])
             self.ui.plainTextEdit_log.appendPlainText('Tx:'+' '.join(['%02X'%i for i in pkt]))
         else:
             self.ui.plainTextEdit_log.appendPlainText('[err]must select one in rf and plc.')
