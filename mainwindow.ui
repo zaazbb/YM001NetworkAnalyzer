@@ -612,11 +612,32 @@
      </widget>
     </item>
     <item>
-     <widget class="QComboBox" name="comboBox_cmd">
-      <property name="editable">
-       <bool>true</bool>
+     <layout class="QHBoxLayout" name="horizontalLayout_8" stretch="1,0,0">
+      <property name="spacing">
+       <number>4</number>
       </property>
-     </widget>
+      <item>
+       <widget class="QComboBox" name="comboBox_cmd">
+        <property name="editable">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QCheckBox" name="checkBox_autosend">
+        <property name="text">
+         <string>Auto</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="pushButton_send">
+        <property name="text">
+         <string>send</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
     </item>
    </layout>
   </widget>

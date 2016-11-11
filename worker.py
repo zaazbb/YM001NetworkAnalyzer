@@ -95,7 +95,28 @@ def worker(conn, port, bypasstype, chnlgrp):
                         frame_index = 0
                 except:
                     conn.send(['err', traceback.format_exc()])
-                #print(' '.join('%02X'%i for i in pkt))
+                print(' '.join('%02X'%i for i in pkt))
+            elif msg[0] == 'sendx':
+                pkt = bytearray(b'\xFE\xFE\xFE\xFE\x00\x00\x01\x00')
+                msg[3][2] = frame_index
+                pkt.extend(msg[3])
+                pkt[4] = len(msg[3]) + 3
+                pkt[5] = msg[1]
+                pkt[6] = 0x80 + msg[2]
+                if bypasstype == 2:
+                    if pkt[5] != 0 and pkt[5] != chnlgrp:
+                        pkt[5] = 0
+                pkt[7] = pkt[4] ^ pkt[5] ^ pkt[6]
+                # crc
+                #pkt.extend(predefined.mkCrcFun('x-25')(pkt[4:]).to_bytes(2, 'little'))
+                try:
+                    ser.write(pkt)
+                    frame_index += 1
+                    if frame_index == 256:
+                        frame_index = 0
+                except:
+                    conn.send(['err', traceback.format_exc()])
+                print(' '.join('%02X'%i for i in pkt))
             elif msg[0] == 'setchnlgrp':
                 pkt_chnlgrp [5] = msg[1]
                 pkt_chnlgrp[7] = pkt_chnlgrp[4] ^ pkt_chnlgrp[5] ^ pkt_chnlgrp[6]

@@ -492,19 +492,50 @@ class MainWindow(QMainWindow):
         else:
             self.ui.plainTextEdit_log.appendPlainText('[err]must select one in rf and plc.')
 
+    def _CmdPro(self, s):
+        if s.startswith('send '):
+            cmd = s.split(maxsplit=2)
+            if len(cmd) > 1:
+                try:
+                    cmd[1] = int(cmd[1], 16)
+                    cmd[2] = bytearray.fromhex(cmd[2])
+                    self.conn.send(cmd)
+                    self.ui.plainTextEdit_log.appendPlainText(
+                        '[Tx]chnl(%i) %s.' % (cmd[1], ' '.join('%02X'%ii for ii in cmd[2])))
+                except:
+                    self.ui.plainTextEdit_log.appendPlainText('[error]send data error.\n')
+        elif s.startswith('sendx '):
+            cmd = s.split(maxsplit=3)
+            if len(cmd) > 1:
+#                        try:
+                        cmd[1] = int(cmd[1], 16)
+                        cmd[2] = int(cmd[2])
+                        cmd[3] = bytearray.fromhex(cmd[3])
+                        self.conn.send(cmd)
+                        self.ui.plainTextEdit_log.appendPlainText(
+                            '[Tx]chnl(%02X-%i) %s.' % (cmd[1], cmd[2], ' '.join('%02X'%ii for ii in cmd[3])))
+#                        except:
+#                            self.ui.plainTextEdit_log.appendPlainText('[error]send data error.\n')
+
     def keyReleaseEvent(self, e):
         key = e.key()
         if key == Qt.Key_Return:
-            cmd = self.ui.comboBox_cmd.currentText().split(maxsplit=2)
-            if len(cmd) > 1:
-                if cmd[0] == 'send':
-                    if self.conn:
-                        try:
-                            cmd[1] = int(cmd[1], 16)
-                            cmd[2] = bytearray.fromhex(cmd[2])
-                            self.conn.send(cmd)
-                            self.ui.plainTextEdit_log.appendPlainText(
-                                '[Tx]chnl(%i) %s.' % (cmd[1], ' '.join('%02X'%ii for ii in cmd[2])))
-                        except:
-                            self.ui.plainTextEdit_log.appendPlainText('[error]send data error.\n')
+            self._CmdPro(self.ui.comboBox_cmd.currentText())
             self.ui.comboBox_cmd.setCurrentText('')
+
+    @pyqtSlot()
+    def on_pushButton_send_clicked(self):
+        if self.ui.pushButton_send.text() == 'send':
+            if self.ui.checkBox_autosend.isChecked():
+                self.autosendtimer = QTimer(self)
+                self.autosendtimer.timeout.connect(self._AutoSend)  
+                self.autosendtimer.start(1000)
+                self.ui.pushButton_send.setText('stop')
+            else:
+                self._AutoSend()
+        else:
+            self.autosendtimer.stop()
+            self.ui.pushButton_send.setText('send')
+
+    def _AutoSend(self):
+        self._CmdPro(self.ui.comboBox_cmd.currentText())
