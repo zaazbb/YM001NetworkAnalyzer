@@ -17,6 +17,15 @@ testdata = [
 ]
 
 
+frame_index = 0
+
+def get_frame_index():
+    global frame_index
+    frame_index += 1
+    if frame_index == 0:
+        frame_index = 1
+    return frame_index
+
 def worker(conn, port, bypasstype, chnlgrp):
     try:
         if bypasstype == 2:
@@ -31,7 +40,6 @@ def worker(conn, port, bypasstype, chnlgrp):
     flog = open('pkt.log',  'w')
     #f = open('pkt.bin', 'wb')
     
-    frame_index = 0
     pkt_chnlgrp = bytearray(b'\xFE\xFE\xFE\xFE\x03\x0E\x01\x1B')
     pkt_chnlgrp [5] = chnlgrp
     pkt_chnlgrp[7] = pkt_chnlgrp[4] ^ pkt_chnlgrp[5] ^ pkt_chnlgrp[6]
@@ -78,7 +86,7 @@ def worker(conn, port, bypasstype, chnlgrp):
             msg = conn.recv()
             if msg[0] == 'send':
                 pkt = bytearray(b'\xFE\xFE\xFE\xFE\x00\x00\x01\x00')
-                msg[2][2] = frame_index
+                msg[2][2] = get_frame_index()
                 pkt.extend(msg[2])
                 pkt[4] = len(msg[2]) + 3
                 pkt[5] = msg[1]
@@ -90,15 +98,12 @@ def worker(conn, port, bypasstype, chnlgrp):
                 #pkt.extend(predefined.mkCrcFun('x-25')(pkt[4:]).to_bytes(2, 'little'))
                 try:
                     ser.write(pkt)
-                    frame_index += 1
-                    if frame_index == 256:
-                        frame_index = 0
                 except:
                     conn.send(['err', traceback.format_exc()])
                 print(' '.join('%02X'%i for i in pkt))
             elif msg[0] == 'sendx':
                 pkt = bytearray(b'\xFE\xFE\xFE\xFE\x00\x00\x01\x00')
-                msg[3][2] = frame_index
+                msg[3][2] = get_frame_index()
                 pkt.extend(msg[3])
                 pkt[4] = len(msg[3]) + 3
                 pkt[5] = msg[1]
@@ -111,9 +116,6 @@ def worker(conn, port, bypasstype, chnlgrp):
                 #pkt.extend(predefined.mkCrcFun('x-25')(pkt[4:]).to_bytes(2, 'little'))
                 try:
                     ser.write(pkt)
-                    frame_index += 1
-                    if frame_index == 256:
-                        frame_index = 0
                 except:
                     conn.send(['err', traceback.format_exc()])
                 print(' '.join('%02X'%i for i in pkt))
