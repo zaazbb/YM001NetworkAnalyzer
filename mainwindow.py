@@ -112,8 +112,9 @@ class MainWindow(QMainWindow):
         for i in range(6, 6+len(rdata[0][6:10])):
             if rdata[0][i] in self.highlight:
                 item.setBackground(i, QBrush(self.highlight[rdata[0][i]]))
+            item.setTextAlignment(i, Qt.AlignRight)
         self.ui.treeWidget.addTopLevelItem(item)
-        # rowdata[0][?]: 6 - ndst, 7 - msrc, 8 - ndst, 9 - nsrc.
+        # rowdata[0][?]: 6 - mdst, 7 - msrc, 8 - ndst, 9 - nsrc.
         if rdata[0][2] == 'acRdNdCfgUp':
             if rdata[0][9] in self.node['node']:
                 self.node['node'][rdata[0][9]]['item'] .setText(1, rdata[1]['sVer'])
