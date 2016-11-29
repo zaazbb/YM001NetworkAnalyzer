@@ -22,7 +22,7 @@ frame_index = 0
 def get_frame_index():
     global frame_index
     frame_index += 1
-    if frame_index == 0:
+    if frame_index == 256:
         frame_index = 1
     return frame_index
 

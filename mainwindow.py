@@ -497,14 +497,14 @@ class MainWindow(QMainWindow):
         if s.startswith('send '):
             cmd = s.split(maxsplit=2)
             if len(cmd) > 1:
-                try:
+#                try:
                     cmd[1] = int(cmd[1], 16)
                     cmd[2] = bytearray.fromhex(cmd[2])
                     self.conn.send(cmd)
                     self.ui.plainTextEdit_log.appendPlainText(
                         '[Tx]chnl(%i) %s.' % (cmd[1], ' '.join('%02X'%ii for ii in cmd[2])))
-                except:
-                    self.ui.plainTextEdit_log.appendPlainText('[error]send data error.\n')
+#                except:
+#                    self.ui.plainTextEdit_log.appendPlainText('[error]send data error.\n')
         elif s.startswith('sendx '):
             cmd = s.split(maxsplit=3)
             if len(cmd) > 1:
