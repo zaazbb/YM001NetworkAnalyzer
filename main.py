@@ -1,15 +1,19 @@
 
 import sys
 import configparser
-from multiprocessing import Process, Pipe, freeze_support
+#from multiprocessing import Process, Pipe, freeze_support
+from multiprocessing import Pipe, freeze_support
+from multiprocessing.context import Process
+
 
 from worker import worker
 
 
-version = '0.0.2'
+version = '0.0.3'
 
 
-if __name__ == '__main__':
+#if __name__ == '__main__':
+if __name__.endswith('__main__'):
     freeze_support()
 
     config = configparser.ConfigParser()
@@ -19,13 +23,19 @@ if __name__ == '__main__':
 
     conn_file = None
     if len(sys.argv) > 1:
+        if sys.argv[1] == 'listports':
+            from serial.tools.list_ports import comports
+            for i in comports():
+                    print(list(i)[0])
+            sys.exit(0)
+        
         if sys.argv[1].upper().startswith('COM'):
             conn_file, child_conn = Pipe()
-            p = Process(target=worker, 
-                             args=(child_conn, sys.argv[1], 
-                                      config['DEFAULT'].getint('bypass_type'), 
-                                      chnlgrp), 
-                             daemon=True)
+            p = Process(target=worker,
+                        args=(child_conn, sys.argv[1],
+                              config['DEFAULT'].getint('bypass_type'),
+                              chnlgrp),
+                        daemon=True)
             p.start()
         else:
             conn_file = sys.argv[1]
@@ -49,6 +59,7 @@ if __name__ == '__main__':
     
     app = QApplication(sys.argv)
     mainWin = MainWindow(conn_file, nodes, chnlgrp, config)
+    mainWin.setWindowTitle('NetworkAnalyzer_v' + version)
     mainWin.show()
     
     sys.exit(app.exec_())

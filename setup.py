@@ -7,8 +7,8 @@ from main import version
 build_exe_options = {
     #"build_exe"
     "optimize": 2,
-    #"excludes"
-##    "includes": ["intelhex.intelhex"],
+    #"excludes":['asyncio', 'email', 'html', 'http', 'logging', 'unittest', 'xml'],
+    #"includes": ["multiprocessing"],
 ##    "packages": ["os"],
     "packages": ["serial"],
     #"namespace_packages"
@@ -32,7 +32,7 @@ build_exe_options = {
     #"bin_includes"
     #"bin_excludes"
     #"bin_path_includes"
-    #"bin_path_excludes"
+    #"bin_path_excludes": ['PyQt5/doc', 'PyQt5/examples'],
     #"silent"
 }
 
@@ -42,9 +42,9 @@ base = None
 if sys.platform == "win32":
     base = "Win32GUI"
 
-setup(  name = "YM001NetworkAnalyzer",
+setup(  name = "NetworkAnalyzer",
         version = version,
-        description = "YM001NetworkAnalyzer!",
+        description = "NetworkAnalyzer!",
         options = {"build_exe": build_exe_options},
         executables = [Executable("main.py",
 ##                                  base=base,

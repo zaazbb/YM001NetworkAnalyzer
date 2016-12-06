@@ -7,7 +7,7 @@ import main
 
 
 platform = sysconfig.get_platform()
-exe_name = 'build/YM001NetworkAnalyzer_%s_v%s' % (platform, main.version)
+exe_name = 'build/NetworkAnalyzer_%s_v%s' % (platform, main.version)
 exe_dir = 'build/exe.%s-%s' % (platform, sysconfig.get_python_version())
 
 if os.path.exists(exe_dir):

@@ -98,6 +98,13 @@ class MainWindow(QMainWindow):
                 sendchnls = config['DEFAULT']['sendchannel']
                 self.__sendchnl = int(sendchnls, 16 if sendchnls.startswith('0x') else 10)
 
+        self.__whosyourdaddy = os.path.exists('whosyourdaddy')
+        if not self.__whosyourdaddy:
+            self.ui.pushButton_rdbgsend.setEnabled(False)
+            self.ui.pushButton_rfplcsw.setEnabled(False)
+            self.ui.pushButton_upgrade.setEnabled(False)
+            
+
     def load_file(self, file):
         with open(file, 'rb') as f:
             self.buf = pickle.load(f)
@@ -310,14 +317,15 @@ class MainWindow(QMainWindow):
         if self.conn and self.ui.treeWidget_node.selectedItems():
             popMenu =QMenu(self)
             popMenu.addAction(self.ui.actionRdSnCfg)
-            popMenu.addAction(self.ui.actionUpgBpSts)
-            popMenu.addAction(self.ui.actionRdbgPoolType)
-            popMenu.addSeparator()
-            popMenu.addAction(self.ui.actionEraseParam)
-            popMenu.addSeparator()
-            popMenu.addAction(self.ui.actionUpgTxm)  
-            popMenu.addSeparator()
-            popMenu.addAction(self.ui.actionUpgRdBack)  
+            if self.__whosyourdaddy:
+                popMenu.addAction(self.ui.actionUpgBpSts)
+                popMenu.addAction(self.ui.actionRdbgPoolType)
+                popMenu.addSeparator()
+                popMenu.addAction(self.ui.actionEraseParam)
+                popMenu.addSeparator()
+                popMenu.addAction(self.ui.actionUpgTxm)  
+                popMenu.addSeparator()
+                popMenu.addAction(self.ui.actionUpgRdBack)  
             popMenu.popup(QCursor.pos())
 
     @pyqtSlot()
