@@ -93,7 +93,7 @@ def bitrate(dat, bitn):
     return '%.2f%%' % (bits*100/bitn)
     
 def parse_sver(sverd):
-         return '%d.%d.%d' % (sverd[2], sverd[1], sverd[0])
+         return '%02X.%02X.%02X' % (sverd[2], sverd[1], sverd[0])
     
 
 def PacketParser(pkt):

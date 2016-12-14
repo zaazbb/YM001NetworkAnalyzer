@@ -352,6 +352,11 @@
                  <string>32</string>
                 </property>
                </item>
+               <item>
+                <property name="text">
+                 <string>33</string>
+                </property>
+               </item>
               </widget>
              </item>
              <item>
