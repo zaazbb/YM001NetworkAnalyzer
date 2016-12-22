@@ -38,6 +38,7 @@ class MainWindow(QMainWindow):
         self.ui.treeWidget_node.addTopLevelItem(root)
         for k, v in nodes['node'].items():
             item = QTreeWidgetItem(root, [k])
+            item.setTextAlignment(0, Qt.AlignRight)
             nodes['node'][k]['item'] = item
             if v['color']:
                 color = getattr(Qt, v['color'])
@@ -46,6 +47,7 @@ class MainWindow(QMainWindow):
             self.ui.treeWidget_node.addTopLevelItem(item)
         if nodes['xnode']:
             root = QTreeWidgetItem(None, ['xnode'])
+            root.setTextAlignment(0, Qt.AlignRight)
             self.ui.treeWidget_node.addTopLevelItem(root)
             for k, v in nodes['xnode'].items():
                 item = QTreeWidgetItem(root, [k])
@@ -87,7 +89,7 @@ class MainWindow(QMainWindow):
                 self.timer = QTimer(self)
                 self.timer.timeout.connect(self.update)
                 self.timer.start(100)     
-                self.upgsrc = self.config['upgrade']['srcaddr'][:12].zfill(12)
+                self.upgsrc = self.config['upgrade']['srcaddr'][:12].lstrip('0')
                 self.upgtimer = QTimer(self)
                 self.upgtimer.setSingleShot(True)
                 self.upgtimer.timeout.connect(self.upgrade)
@@ -149,6 +151,8 @@ class MainWindow(QMainWindow):
                     item = QTreeWidgetItem(None, msg[1])
                     for i in range(self.ui.treeWidget.columnCount()):
                         item.setBackground(i, QBrush(Qt.green))
+                        if 5 < i < 10:
+                            item.setTextAlignment(i, Qt.AlignRight)
                     self.ui.treeWidget.insertTopLevelItem(0, item)
                     self.ui.treeWidget.scrollToTop()
                     self.parsepkt = msg[1:]

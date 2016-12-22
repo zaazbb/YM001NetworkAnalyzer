@@ -82,7 +82,11 @@ ApsTsmtPower = {0:'16dBm', 1:'10dBm', 2:'4dBm', 3:'-2dBm'}
 
 def reverse_hex(addr):
     addr.reverse()
-    return addr.hex().upper()
+    return '0x' + addr.hex().upper()
+
+def reverse_hex_human(addr):
+    addr.reverse()
+    return addr.hex().upper().lstrip('0')
     
 def bitrate(dat, bitn):
     bits = 0
@@ -125,17 +129,17 @@ def PacketParser(pkt):
         baseinfo.append('')
     if macfcd.panIdCompr:
         #pktdict['mac']['panId'] = int.from_bytes(pkt[i:i+2], 'little')
-        baseinfo.append(reverse_hex(pkt[i:i+2]))
+        baseinfo.append(reverse_hex_human(pkt[i:i+2]))
         i += 2
     else:
         baseinfo.append('')
     n = AddrLen[macfcd.dstAddrMode]
     #pktdict['mac']['dstAddr'] = pkt[i:i+n]
-    baseinfo.append(reverse_hex(pkt[i:i+n]))
+    baseinfo.append(reverse_hex_human(pkt[i:i+n]))
     i += n
     n = AddrLen[macfcd.srcAddrMode]
     #pktdict['mac']['srcAddr'] = pkt[i:i+n]
-    baseinfo.append(reverse_hex(pkt[i:i+n]))
+    baseinfo.append(reverse_hex_human(pkt[i:i+n]))
     i += n
     if macfcd.extInfoInd:
         extlen = pkt[i]
@@ -205,7 +209,7 @@ def PacketParser(pkt):
                 i += 2
                 cmdinfo['upgMode'] = 'bcast' if pkt[i] else 'unicast'
                 i += 1
-                cmdinfo['dstAddr'] = reverse_hex(pkt[i:i+6])
+                cmdinfo['dstAddr'] = reverse_hex_human(pkt[i:i+6])
                 i += 6
                 cmdinfo['fileType'] = {1:'dsp', 2:'app'}.get(pkt[i], '???')
                 i += 1
@@ -247,11 +251,11 @@ def PacketParser(pkt):
                 i += 2
                 cmdinfo['devSn'] = ' '.join(['%02X'%i for i in pkt[i:i+8]])
                 i += 8
-                cmdinfo['lAddr'] = reverse_hex(pkt[i:i+6])
+                cmdinfo['lAddr'] = reverse_hex_human(pkt[i:i+6])
                 i += 6
-                cmdinfo['sAddr'] = reverse_hex(pkt[i:i+2])
+                cmdinfo['sAddr'] = reverse_hex_human(pkt[i:i+2])
                 i += 2
-                cmdinfo['panId'] = reverse_hex(pkt[i:i+2])
+                cmdinfo['panId'] = reverse_hex_human(pkt[i:i+2])
                 i += 2
                 cmdinfo['runMode'] = '%02X' % pkt[i]
             elif pkt[i] == 6:
@@ -282,6 +286,32 @@ def PacketParser(pkt):
             baseinfo[0] = cmdinfo['cmd'] = rdbgtype[pkt[i]] if pkt[i] in range(len(rdbgtype)) else 'mcDbgRsv'
             i += 1
             cmdinfo['dat'] = ' '.join('%02X'%ii for ii in pkt[i:-2])
+        elif pkt[i] == 0xFE and pkt[i+1] == 0x4D and pkt[i+2] == 0x59:
+            i += 3
+            if pkt[i] == 1:
+                baseinfo[0] = 'mcxUpgPkt'
+                i += 1
+                cmdinfo['crc32'] = reverse_hex(pkt[i:i+4])
+                i += 4
+                cmdinfo['pktNum'] = str(int.from_bytes(pkt[i:i+2], 'little'))
+                i += 2
+                cmdinfo['pktIdx'] = str(int.from_bytes(pkt[i:i+2], 'little'))
+                i += 2
+                cmdinfo['pktLen'] = str(pkt[i])
+            elif pkt[i] == 2:
+                baseinfo[0] = 'mcxUpgEntRx'
+                i += 1
+                cmdinfo['ver'] = parse_sver(pkt[i:i+3])
+                i += 3
+                cmdinfo['date'] = '%02X-%02X-%02X' % (pkt[i+2], pkt[i+1], pkt[i]) 
+            elif pkt[i] == 0x81:
+                baseinfo[0] = 'mcxUpgPktAck'
+                i += 1
+                cmdinfo['NxtpktIdx'] = str(int.from_bytes(pkt[i:i+2], 'little'))
+            elif pkt[i] == 0x82:
+                baseinfo[0] = 'mcxUpgEntRxAck'
+            else:
+                baseinfo[0] = 'mcxReserve'
         else:
             baseinfo[0] = 'mcReserve'
     elif macfcd.FTD == 1:
@@ -293,11 +323,11 @@ def PacketParser(pkt):
         i += 1
         n = AddrLen[nwkfcd.dstAddrMode]
         #pktdict['nwk']['dstAddr'] = pkt[i:i+n]
-        baseinfo.append(reverse_hex(pkt[i:i+n]))
+        baseinfo.append(reverse_hex_human(pkt[i:i+n]))
         i += n
         n = AddrLen[nwkfcd.srcAddrMode]
         #pktdict['nwk']['srcAddr'] = pkt[i:i+n]
-        baseinfo.append(reverse_hex(pkt[i:i+n]))
+        baseinfo.append(reverse_hex_human(pkt[i:i+n]))
         i += n
         #pktdict['nwk']['radius'] = pkt[i] & 0x0F
         #pktdict['nwk']['frmIdx'] = pkt[i] >> 4
@@ -313,7 +343,7 @@ def PacketParser(pkt):
             for ii in range(routeinfo.number):
                 n = AddrLen[getattr(routeinfo, 'addrMode%i' % ii)]
                 #pktdict['nwk']['relayLst'].append(pkt[i:i+n])
-                routeaddrs.append(reverse_hex(pkt[i:i+n]))
+                routeaddrs.append(reverse_hex_human(pkt[i:i+n]))
                 i += n
             baseinfo.append('-'.join(routeaddrs))
         else:
@@ -336,7 +366,7 @@ def PacketParser(pkt):
                 cmdinfo['errCode'] = 'noResp' if pkt[i] == 1 else '--'
                 i += 1
                 n = AddrLen[nwkfcd.dstAddrMode]
-                cmdinfo['failAddr'] = reverse_hex(pkt[i:i+n])
+                cmdinfo['failAddr'] = reverse_hex_human(pkt[i:i+n])
             elif pkt[i] == 0x10:
                 # fiGatherCmd
                 i += 1
@@ -351,7 +381,7 @@ def PacketParser(pkt):
                 i += 1
                 neighbors = []
                 for ii in range(n):
-                    neighbors.append('%s:%02X' % (reverse_hex(pkt[i:i+6]),  pkt[i+6]))
+                    neighbors.append('%s:%02X' % (reverse_hex_human(pkt[i:i+6]),  pkt[i+6]))
                     i += 7
                 cmdinfo['neighbors'] = '\n'.join(neighbors)
             elif pkt[i] == 0x12:
@@ -460,6 +490,88 @@ def PacketParser(pkt):
                     cmdinfo['level'] = str(tslotlv.level)
                     i += 2
                     cmdinfo['maxDly'] = str(int.from_bytes(pkt[i:i+4], 'little'))
+                elif pkt[i] == 0xFE and pkt[i+1] == 0x4D and pkt[i+2] == 0x59:
+                    i += 3
+                    if pkt[i] == 1:
+                        baseinfo[0] = 'acxCfgAddr'
+                        i += 1
+                        cmdinfo['addr'] = reverse_hex_human(pkt[i:i+6])
+                    elif pkt[i] == 2:
+                        baseinfo[0] = 'acxSetRfPlcSW'
+                        i += 1
+                        cmdinfo['enable'] = '0x%02X' % pkt[i]
+                    elif pkt[i] == 3:
+                       baseinfo[0] = 'acxSetJoinNetSW'
+                       i += 1
+                       cmdinfo['enable'] = '0x%02X' % pkt[i]
+                    elif pkt[i] == 4:
+                        baseinfo[0] = 'acxSetPlcTxMod'
+                        i += 1
+                        cmdinfo['txmod'] = '0x%02X' % pkt[i]
+                    elif pkt[i] == 5:
+                        #baseinfo[0] = 'acxRdExtPar'
+                        i += 1
+                        if i < len(pkt):
+                            baseinfo[0] = 'acxRdExParUp'
+                            cmdinfo['ver'] = str(pkt[i])
+                            i += 1
+                            cmdinfo['rfplc_en'] = '0x%02X' % pkt[i]
+                            i += 1
+                            cmdinfo['enternet_en'] = '0x%02X' % pkt[i]
+                            i += 1
+                            cmdinfo['rfcal'] = reverse_hex(pkt[i:i+2])
+                            i += 2
+                            cmdinfo['rftxlv'] = str(pkt[i])
+                            i += 1
+                            cmdinfo['plctxmod'] = str(pkt[i])
+                            i += 1
+                            cmdinfo['plctxlv'] = str(pkt[i])
+                            i += 1
+                            cmdinfo['rbttimes'] = str(int.from_bytes(pkt[i:i+2], 'little'))
+                            i += 2
+                            cmdinfo['rbtreason'] = '0x%02X' % pkt[i]
+                        else:
+                            baseinfo[0] = 'acxRdExParDn'
+                    elif pkt[i] == 6:
+                        #baseinfo[0] = 'acxRdVerInfo'
+                        i += 1
+                        if i < len(pkt):
+                            baseinfo[0] = 'acxRdVerInfoUp'
+                            cmdinfo['rssiDn'] = str(pkt[i])
+                            i += 1
+                            cmdinfo['rssiUp'] = str(pkt[i])
+                            i += 1
+                            cmdinfo['sver'] = parse_sver(pkt[i:i+3])
+                            i += 3
+                            cmdinfo['time'] = '%02X:%02X:%02X' % (pkt[i+2], pkt[i+1], pkt[i]) 
+                            i += 3
+                            cmdinfo['date'] = '%02X-%02X-%02X' % (pkt[i+2], pkt[i+1], pkt[i]) 
+                            i += 3
+                            cmdinfo['sn'] =  reverse_hex_human(pkt[i:i+6])
+                        else:
+                            baseinfo[0] = 'acxRdVerInfoDn'
+                    elif pkt[i] == 7:
+                        baseinfo[0] = 'acxStartJoinNet'
+                        i += 1
+                        cmdinfo['chnlgrp'] = str(pkt[i]) 
+                    elif pkt[i] == 8:
+                        baseinfo[0] = 'acxRstRbtinfo'
+                    elif pkt[i] == 9:
+                        baseinfo[0] = 'acxInitParam'
+                    elif pkt[i] == 0x41:
+                        baseinfo[0] = 'acxEntUpgRx'
+                        i += 1
+                        cmdinfo['ver'] = parse_sver(pkt[i:i+3])
+                        i += 3
+                        cmdinfo['date'] = '%02X-%02X-%02X' % (pkt[i+2], pkt[i+1], pkt[i]) 
+                    elif pkt[i] == 0x42:
+                        baseinfo[0] = 'acxEntUpgTx'
+                        i += 1
+                        cmdinfo['dst'] = reverse_hex_human(pkt[i:i+6])
+                        i += 6
+                        cmdinfo['type'] = 'online' if pkt[i] == 0 else 'offline' 
+                    else:
+                        baseinfo[0] = 'acxReserve'
                 baseinfo.append(baseinfo[0])
             elif apsfcd.FTD == 2:
                 # data route.
@@ -509,9 +621,9 @@ def mac_beacon(p):
     i += 2
     info['fiThreshold'] = str(p[i])
     i += 1
-    info['cnPanId'] =  reverse_hex(p[i:i+2])
+    info['cnPanId'] =  reverse_hex_human(p[i:i+2])
     i += 2
-    info['cnAddr'] = reverse_hex(p[i:i+6])
+    info['cnAddr'] = reverse_hex_human(p[i:i+6])
     return info
     
 def nwk_nwk_maintain_req(p):
@@ -527,7 +639,7 @@ def nwk_nwk_maintain_req(p):
     routers = []
     fipowers = []
     for ii in range(pathn):
-        routers.append(reverse_hex(p[i:i+n]))
+        routers.append(reverse_hex_human(p[i:i+n]))
         i += n
     for ii in range(pathn-1):
         fipowers.append(str(p[i]))
@@ -550,7 +662,7 @@ def nwk_nwk_maintain_resp(p):
     dnRssi = []
     upRssi = []
     for ii in range(pathn):
-        routers.append(reverse_hex(p[i:i+n]))
+        routers.append(reverse_hex_human(p[i:i+n]))
         i += n
     for ii in range(pathn-1):
         dnRssi.append(str(p[i]))
@@ -568,9 +680,9 @@ def nwk_join_nwk_resp(p):
     info = {}
     info['cmdOpt'] = '%02X'%p[i]
     i += 1
-    info['panId'] = reverse_hex(p[i:i+2])
+    info['panId'] = reverse_hex_human(p[i:i+2])
     i += 2
-    info['cnAddr'] = reverse_hex(p[i:i+6])
+    info['cnAddr'] = reverse_hex_human(p[i:i+6])
     i += 6
     tslotlv = TimeslotLevel.from_buffer(p[i:i+2])
     info['timeSlot'] = str(tslotlv.timeSlot)
@@ -583,7 +695,7 @@ def nwk_join_nwk_resp(p):
     i += 1
     relays = []
     for ii in range(n):
-        relays.append(reverse_hex(p[i:i+2]))
+        relays.append(reverse_hex_human(p[i:i+2]))
         i += 2
     info['relays'] = '-'.join(relays)
     return info
@@ -605,10 +717,10 @@ def nwk_cfg_sn(p):
         info['level'] = str(tslotlv.level)
     i += 2
     if opt.shortAddr:
-        info['shortAddr'] =  reverse_hex(p[i:i+2])
+        info['shortAddr'] =  reverse_hex_human(p[i:i+2])
         i += 2
     if opt.panId:
-        info['panId'] =  reverse_hex(p[i:i+2])
+        info['panId'] =  reverse_hex_human(p[i:i+2])
         i += 2
     if opt.relayLst:
         n = p[i]
@@ -620,7 +732,7 @@ def nwk_cfg_sn(p):
             i += 1
             relays = []
             for iii in range(nn):
-                relays.append(reverse_hex(p[i:i+2]))
+                relays.append(reverse_hex_human(p[i:i+2]))
                 i += 2
             relayLst.append('-'.join(relays))
         info['relayLst'] = ','.join(relayLst) 
@@ -629,13 +741,13 @@ def nwk_cfg_sn(p):
 def aps_read_node_config(p):
     i = 0
     info = {}
-    info['factoryAddr'] = reverse_hex(p[i:i+6])
+    info['factoryAddr'] = reverse_hex_human(p[i:i+6])
     i += 6
     info['nodeType'] = str(p[i])
     i += 1
-    info['panId'] = reverse_hex(p[i:i+2])
+    info['panId'] = reverse_hex_human(p[i:i+2])
     i += 2
-    info['shortAddr'] = reverse_hex(p[i:i+2])
+    info['shortAddr'] = reverse_hex_human(p[i:i+2])
     i += 2
     info['vendId'] = reverse_hex(p[i:i+2])
     i += 2
@@ -665,7 +777,7 @@ def aps_read_node_config(p):
         i += 1
         relays = []
         for iii in range(nn):
-            relays.append(reverse_hex(p[i:i+2]))
+            relays.append(reverse_hex_human(p[i:i+2]))
             i += 2
         relayLst.append('-'.join(relays))
     info['relayLst'] = ','.join(relayLst) 

@@ -134,7 +134,7 @@ def mk_rdsncfg(dst, src):
     template = '41 CD 01 FF FF 11 11 22 22 33 33 00 00 00 00 00 00 7C 11 11 22 22 33 33 00 00 00 00 00 00 11 01 01 04'
     pkt = bytearray.fromhex(template)
     i = 5
-    dstaddr = bytearray.fromhex(dst)
+    dstaddr = bytearray.fromhex(dst.zfill(12))
     dstaddr.reverse()
     pkt[i:i+6] = dstaddr
     i += 6

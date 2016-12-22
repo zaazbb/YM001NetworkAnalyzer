@@ -47,11 +47,11 @@ if __name__.endswith('__main__'):
         node = i.split()
         color = node[1] if len(node) > 1 else ''
         if node[0][0] == 'm':
-            nodes['mnode'] = [node[0][1:13].zfill(12), color]
+            nodes['mnode'] = [node[0][1:13].lstrip('0'), color]
         elif node[0][0] == 'x':
-            nodes['xnode'][node[0][1:13].zfill(12)] = color
+            nodes['xnode'][node[0][1:13].lstrip('0')] = color
         else:
-            nodes['node'][node[0][:12].zfill(12)] = {'color': color, 'bpFlag': ''}
+            nodes['node'][node[0][:12].lstrip('0')] = {'color': color, 'bpFlag': ''}
     #print(nodes)       
     
     from PyQt5.QtWidgets import QApplication
