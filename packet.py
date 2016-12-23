@@ -86,7 +86,8 @@ def reverse_hex(addr):
 
 def reverse_hex_human(addr):
     addr.reverse()
-    return addr.hex().upper().lstrip('0')
+    addrstr = addr.hex().lstrip('0').upper()
+    return addrstr if addrstr else '0'
     
 def bitrate(dat, bitn):
     bits = 0
@@ -108,43 +109,36 @@ def PacketParser(pkt):
 #        return None, 'PHR check error'
 #    if predefined.mkCrcFun('x-25')(pkt) != int.from_bytes(pkt[-2:], 'little'):
 #        return None, 'crc error'
-    #pktdict = {'phy': {'infoChnlIdx': pkt[1], 'stdInd': pkt[2]}}
 
     i = 0
     
     # parse mac.
     macfcd = MacFCD.from_buffer(pkt[i:i+2])
-    #pktdict['mac'] = {'frmType': macfcd.FTD,
-    #                  'frmHangup': macfcd.frmHangup,
-    #                  'ackReq': macfcd.ackReq,
-    #                  'frmVer': macfcd.frmVer}
     baseinfo = [mac_ftype[macfcd.FTD], str(macfcd.ackReq)]
     cmdinfo = OrderedDict()
     i += 2
     if macfcd.frmIdxcompr:
-        #pktdict['mac']['frmIdx'] = pkt[i]
         baseinfo.append(str(pkt[i]))
         i += 1
     else:
         baseinfo.append('')
     if macfcd.panIdCompr:
-        #pktdict['mac']['panId'] = int.from_bytes(pkt[i:i+2], 'little')
         baseinfo.append(reverse_hex_human(pkt[i:i+2]))
         i += 2
     else:
         baseinfo.append('')
     n = AddrLen[macfcd.dstAddrMode]
-    #pktdict['mac']['dstAddr'] = pkt[i:i+n]
+    # mdst.
     baseinfo.append(reverse_hex_human(pkt[i:i+n]))
     i += n
     n = AddrLen[macfcd.srcAddrMode]
-    #pktdict['mac']['srcAddr'] = pkt[i:i+n]
+    # msrc
     baseinfo.append(reverse_hex_human(pkt[i:i+n]))
     i += n
     if macfcd.extInfoInd:
         extlen = pkt[i]
         i += 1
-        #pktdict['mac']['extInfo'] = pkt[i:i+extlen]
+        # pkt[i:i+extlen], mac extInfo.
         i += extlen
 
     if macfcd.FTD == 0:
@@ -318,31 +312,29 @@ def PacketParser(pkt):
         # data.
         # parse nwk.
         nwkfcd = NwkFCD.from_buffer(pkt[i:i+1])
-        #pktdict['nwk'] = {'frmType': nwkfcd.FTD}
         baseinfo[0] = nwk_ftype[nwkfcd.FTD]
         i += 1
         n = AddrLen[nwkfcd.dstAddrMode]
-        #pktdict['nwk']['dstAddr'] = pkt[i:i+n]
+        # ndst.
         baseinfo.append(reverse_hex_human(pkt[i:i+n]))
         i += n
         n = AddrLen[nwkfcd.srcAddrMode]
-        #pktdict['nwk']['srcAddr'] = pkt[i:i+n]
+        # nsrc.
         baseinfo.append(reverse_hex_human(pkt[i:i+n]))
         i += n
-        #pktdict['nwk']['radius'] = pkt[i] & 0x0F
-        #pktdict['nwk']['frmIdx'] = pkt[i] >> 4
+        # nwk frmIdx.
         baseinfo.append(str(pkt[i] >> 4))
+        # nwk radius.
         baseinfo.append(str(pkt[i] & 0x0F))
         i += 1
         if nwkfcd.routeInd:
             routeinfo = NwkRouteInfo.from_buffer(pkt[i:i+4])
-            #pktdict['nwk']['relayIdx'] = routeinfo.index
             routeaddrs = []
             i += 3
-            #pktdict['nwk']['relayLst'] = []
+            # nwk relayLst.
             for ii in range(routeinfo.number):
                 n = AddrLen[getattr(routeinfo, 'addrMode%i' % ii)]
-                #pktdict['nwk']['relayLst'].append(pkt[i:i+n])
+                # pkt[i:i+n], nwk relayLst.
                 routeaddrs.append(reverse_hex_human(pkt[i:i+n]))
                 i += n
             baseinfo.append('-'.join(routeaddrs))
@@ -410,19 +402,17 @@ def PacketParser(pkt):
             # parse aps.
             apsfcd = ApsFCD.from_buffer(pkt[i:i+1])
             i += 1
-            #pktdict['aps'] = {'frmType': apsfcd.FTD, 'frmIdx': pkt[i]}
             baseinfo.append(str(pkt[i]))
             baseinfo[0] = aps_ftype[apsfcd.FTD]
             i += 1
             if apsfcd.OEI:
                 extlen = pkt[i]
                 i += 1
-                #pktdict['aps']['vendId'] = pkt[i:i+2]
+                # pkt[i:i+2], aps vendId.
                 #i += 2
-                #pktdict['aps']['extData'] = pkt[i:i+extlen]
+                # pkt[i:i+extlen], aps extData.
                 i += extlen
-            #pktdict['aps']['DUI'] = pkt[i]
-            #baseinfo.append(str(pkt[i]))
+            # pkt[i], aps DUI.
             if apsfcd.FTD == 0:
                 # ack/nack.
                 baseinfo.append('Ack' if pkt[i] else 'Nack')
@@ -600,7 +590,6 @@ def PacketParser(pkt):
                 baseinfo.append(cmdinfo['reportType'])
             else:
                 baseinfo.append(str(pkt[i]))
-    #return pktdict
     return baseinfo, cmdinfo
     
 
