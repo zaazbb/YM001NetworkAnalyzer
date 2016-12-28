@@ -23,7 +23,12 @@ class MainWindow(QMainWindow):
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
         
-        self.ui.splitter.setStretchFactor(0, 1)
+        self.ui.splitter_h.setStretchFactor(0, 1)
+        self.ui.splitter_v.setStretchFactor(0, 1)
+        self.__rightSideBar_isShrinked = False
+        self.__rightSideBar_lastIndex = self.ui.tabWidget_rightSideBar.currentIndex()
+        self.__bottomSideBar_isShrinked = False
+        self.__bottomSideBar_lastIndex = self.ui.tabWidget_bottomSideBar.currentIndex()
         
         self.node = nodes
         self.config = config
@@ -552,3 +557,47 @@ class MainWindow(QMainWindow):
 
     def _AutoSend(self):
         self._CmdPro(self.ui.comboBox_cmd.currentText())
+    
+    @pyqtSlot(int)
+    def on_tabWidget_rightSideBar_tabBarClicked(self, index):        
+        if self.__rightSideBar_isShrinked:
+            self.ui.tabWidget_rightSideBar.resize(self.__rightSideBar_bigSize)
+            minSize = max(self.__rightSideBar_minSize, self.ui.tabWidget_rightSideBar.minimumSizeHint().width())
+            self.ui.tabWidget_rightSideBar.setMinimumWidth(minSize)
+            self.ui.tabWidget_rightSideBar.setMaximumWidth(self.__rightSideBar_maxSize)
+            self.ui.splitter_h.setSizes(self.__splitter_h_sizes)
+            #self.ui.splitter_h.setStretchFactor(1, 1)
+            self.__rightSideBar_isShrinked = False
+        else:
+            self.__rightSideBar_bigSize = self.ui.tabWidget_rightSideBar.size()
+            if self.__rightSideBar_lastIndex == index:
+                self.__rightSideBar_minSize = self.ui.tabWidget_rightSideBar.minimumSizeHint().width()
+                self.__rightSideBar_maxSize = self.ui.tabWidget_rightSideBar.maximumWidth()
+                self.__splitter_h_sizes = self.ui.splitter_h.sizes()
+                self.ui.tabWidget_rightSideBar.setFixedWidth(self.ui.tabWidget_rightSideBar.tabBar().width())
+                self.ui.splitter_h.setStretchFactor(1, 1)
+                self.__rightSideBar_isShrinked = True
+        self.ui.tabWidget_rightSideBar.setCurrentIndex(index)
+        self.__rightSideBar_lastIndex = index
+        
+    @pyqtSlot(int)
+    def on_tabWidget_bottomSideBar_tabBarClicked(self, index):        
+        if self.__bottomSideBar_isShrinked:
+            self.ui.tabWidget_bottomSideBar.resize(self.__bottomSideBar_bigSize)
+            minSize = max(self.__bottomSideBar_minSize, self.ui.tabWidget_bottomSideBar.minimumSizeHint().height())
+            self.ui.tabWidget_bottomSideBar.setMinimumHeight(minSize)
+            self.ui.tabWidget_bottomSideBar.setMaximumHeight(self.__bottomSideBar_maxSize)
+            self.ui.splitter_v.setSizes(self.__splitter_v_sizes)
+            self.ui.splitter_v.setStretchFactor(1, 1)
+            self.__bottomSideBar_isShrinked = False
+        else:
+            self.__bottomSideBar_bigSize = self.ui.tabWidget_bottomSideBar.size()
+            if self.__bottomSideBar_lastIndex == index:
+                self.__bottomSideBar_minSize = self.ui.tabWidget_bottomSideBar.minimumSizeHint().height()
+                self.__bottomSideBar_maxSize = self.ui.tabWidget_bottomSideBar.maximumHeight()
+                self.__splitter_v_sizes = self.ui.splitter_v.sizes()
+                self.ui.tabWidget_bottomSideBar.setFixedHeight(self.ui.tabWidget_bottomSideBar.tabBar().height())
+                self.ui.splitter_v.setStretchFactor(1, 1)
+                self.__bottomSideBar_isShrinked = True
+        self.ui.tabWidget_bottomSideBar.setCurrentIndex(index)
+        self.__bottomSideBar_lastIndex = index
