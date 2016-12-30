@@ -123,6 +123,9 @@
         <property name="tabPosition">
          <enum>QTabWidget::South</enum>
         </property>
+        <property name="currentIndex">
+         <number>0</number>
+        </property>
         <widget class="QWidget" name="tab_5">
          <attribute name="title">
           <string>日志</string>
@@ -163,7 +166,7 @@
         </widget>
         <widget class="QWidget" name="tab_6">
          <attribute name="title">
-          <string>Tab 2</string>
+          <string>保留</string>
          </attribute>
         </widget>
        </widget>
@@ -177,9 +180,9 @@
        </property>
        <widget class="QWidget" name="tab">
         <attribute name="title">
-         <string>packet</string>
+         <string>报文</string>
         </attribute>
-        <layout class="QVBoxLayout" name="verticalLayout_2" stretch="1,0,0,0">
+        <layout class="QVBoxLayout" name="verticalLayout_2" stretch="1,0,0">
          <item>
           <widget class="QTreeWidget" name="treeWidget_cmdinfo">
            <property name="sizePolicy">
@@ -439,27 +442,13 @@
            </item>
           </layout>
          </item>
-         <item>
-          <spacer name="verticalSpacer_3">
-           <property name="orientation">
-            <enum>Qt::Vertical</enum>
-           </property>
-           <property name="sizeHint" stdset="0">
-            <size>
-             <width>20</width>
-             <height>40</height>
-            </size>
-           </property>
-          </spacer>
-         </item>
         </layout>
         <zorder>plainTextEdit_pktdata</zorder>
         <zorder>treeWidget_cmdinfo</zorder>
-        <zorder>verticalSpacer_3</zorder>
        </widget>
        <widget class="QWidget" name="tab_2">
         <attribute name="title">
-         <string>node</string>
+         <string>操作</string>
         </attribute>
         <layout class="QVBoxLayout" name="verticalLayout_8" stretch="1,0,0">
          <item>
@@ -502,7 +491,7 @@
          <item>
           <widget class="QTabWidget" name="tabWidget_3">
            <property name="currentIndex">
-            <number>2</number>
+            <number>1</number>
            </property>
            <widget class="QWidget" name="tab_7">
             <attribute name="title">
@@ -510,65 +499,145 @@
             </attribute>
             <layout class="QVBoxLayout" name="verticalLayout_4">
              <item>
-              <layout class="QHBoxLayout" name="horizontalLayout_3">
-               <item>
-                <widget class="QCheckBox" name="checkBox_rf">
-                 <property name="text">
-                  <string>RF</string>
-                 </property>
-                 <property name="checked">
-                  <bool>true</bool>
-                 </property>
-                </widget>
-               </item>
-               <item>
-                <widget class="QCheckBox" name="checkBox_plc">
-                 <property name="text">
-                  <string>PLC</string>
-                 </property>
-                 <property name="checked">
-                  <bool>true</bool>
-                 </property>
-                </widget>
-               </item>
-               <item>
-                <widget class="QPushButton" name="pushButton_rfplcsw">
-                 <property name="text">
-                  <string>RfPlcSwitch</string>
-                 </property>
-                </widget>
-               </item>
-               <item>
-                <spacer name="horizontalSpacer">
-                 <property name="orientation">
-                  <enum>Qt::Horizontal</enum>
-                 </property>
-                 <property name="sizeHint" stdset="0">
-                  <size>
-                   <width>40</width>
-                   <height>20</height>
-                  </size>
-                 </property>
-                </spacer>
-               </item>
-              </layout>
+              <widget class="QGroupBox" name="groupBox_2">
+               <property name="title">
+                <string>标准功能</string>
+               </property>
+               <layout class="QHBoxLayout" name="horizontalLayout_5">
+                <item>
+                 <widget class="QPushButton" name="pushButton">
+                  <property name="text">
+                   <string>读取节点配置</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <spacer name="horizontalSpacer_4">
+                  <property name="orientation">
+                   <enum>Qt::Horizontal</enum>
+                  </property>
+                  <property name="sizeHint" stdset="0">
+                   <size>
+                    <width>40</width>
+                    <height>20</height>
+                   </size>
+                  </property>
+                 </spacer>
+                </item>
+                <item>
+                 <widget class="QPushButton" name="pushButton_5">
+                  <property name="text">
+                   <string>抄07电表</string>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
+              </widget>
              </item>
              <item>
-              <spacer name="verticalSpacer">
+              <widget class="QGroupBox" name="groupBox_3">
+               <property name="title">
+                <string>扩展功能</string>
+               </property>
+               <layout class="QHBoxLayout" name="horizontalLayout_6">
+                <item>
+                 <widget class="QPushButton" name="pushButton_2">
+                  <property name="text">
+                   <string>读取扩展信息</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QPushButton" name="pushButton_4">
+                  <property name="text">
+                   <string>读取版本信息</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <spacer name="horizontalSpacer_5">
+                  <property name="orientation">
+                   <enum>Qt::Horizontal</enum>
+                  </property>
+                  <property name="sizeHint" stdset="0">
+                   <size>
+                    <width>40</width>
+                    <height>20</height>
+                   </size>
+                  </property>
+                 </spacer>
+                </item>
+               </layout>
+              </widget>
+             </item>
+             <item>
+              <spacer name="verticalSpacer_4">
                <property name="orientation">
                 <enum>Qt::Vertical</enum>
                </property>
                <property name="sizeHint" stdset="0">
                 <size>
                  <width>20</width>
-                 <height>319</height>
+                 <height>40</height>
                 </size>
                </property>
               </spacer>
              </item>
+             <item>
+              <widget class="QGroupBox" name="groupBox">
+               <property name="title">
+                <string>旧版功能</string>
+               </property>
+               <layout class="QHBoxLayout" name="horizontalLayout_3">
+                <item>
+                 <widget class="QCheckBox" name="checkBox_rf">
+                  <property name="text">
+                   <string>RF</string>
+                  </property>
+                  <property name="checked">
+                   <bool>true</bool>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QCheckBox" name="checkBox_plc">
+                  <property name="text">
+                   <string>PLC</string>
+                  </property>
+                  <property name="checked">
+                   <bool>true</bool>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <spacer name="horizontalSpacer">
+                  <property name="orientation">
+                   <enum>Qt::Horizontal</enum>
+                  </property>
+                  <property name="sizeHint" stdset="0">
+                   <size>
+                    <width>170</width>
+                    <height>20</height>
+                   </size>
+                  </property>
+                 </spacer>
+                </item>
+                <item>
+                 <widget class="QPushButton" name="pushButton_rfplcsw">
+                  <property name="text">
+                   <string>RfPlcSwitch</string>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
+              </widget>
+             </item>
             </layout>
             <zorder></zorder>
-            <zorder>verticalSpacer</zorder>
+            <zorder>verticalSpacer_4</zorder>
+            <zorder>groupBox</zorder>
+            <zorder>groupBox_2</zorder>
+            <zorder>groupBox_3</zorder>
            </widget>
            <widget class="QWidget" name="tab_8">
             <attribute name="title">
@@ -681,76 +750,85 @@
             <attribute name="title">
              <string>远程升级</string>
             </attribute>
-            <layout class="QVBoxLayout" name="verticalLayout_6">
+            <layout class="QVBoxLayout" name="verticalLayout_9">
              <item>
-              <widget class="QProgressBar" name="progressBar_upgrade">
-               <property name="value">
-                <number>0</number>
-               </property>
-               <property name="format">
-                <string>%v/%m</string>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <layout class="QHBoxLayout" name="horizontalLayout_2">
-               <item>
-                <widget class="QCheckBox" name="checkBox_bcast">
-                 <property name="text">
-                  <string>bcast</string>
-                 </property>
-                 <property name="checked">
-                  <bool>true</bool>
-                 </property>
-                </widget>
-               </item>
-               <item>
-                <widget class="QCheckBox" name="checkBox_upgauto">
-                 <property name="toolTip">
-                  <string>after chngm&amp;send,auto readbp &amp; calcbp,and reloop,until bp is allone.</string>
-                 </property>
-                 <property name="text">
-                  <string>auto</string>
-                 </property>
-                 <property name="checked">
-                  <bool>true</bool>
-                 </property>
-                </widget>
-               </item>
-               <item>
-                <widget class="QCheckBox" name="checkBox_usebp">
-                 <property name="toolTip">
-                  <string>used when auto is unchecked.calcbp before chngm&amp;send.</string>
-                 </property>
-                 <property name="text">
-                  <string>usebp</string>
-                 </property>
-                </widget>
-               </item>
-               <item>
-                <widget class="QPushButton" name="pushButton_upgrade">
-                 <property name="enabled">
-                  <bool>false</bool>
-                 </property>
-                 <property name="text">
-                  <string>upgrade</string>
-                 </property>
-                </widget>
-               </item>
-              </layout>
-             </item>
-             <item>
-              <spacer name="verticalSpacer_2">
+              <spacer name="verticalSpacer_5">
                <property name="orientation">
                 <enum>Qt::Vertical</enum>
                </property>
                <property name="sizeHint" stdset="0">
                 <size>
                  <width>20</width>
-                 <height>293</height>
+                 <height>40</height>
                 </size>
                </property>
               </spacer>
+             </item>
+             <item>
+              <widget class="QGroupBox" name="groupBox_4">
+               <property name="title">
+                <string>旧版功能</string>
+               </property>
+               <layout class="QVBoxLayout" name="verticalLayout_6">
+                <item>
+                 <widget class="QProgressBar" name="progressBar_upgrade">
+                  <property name="value">
+                   <number>0</number>
+                  </property>
+                  <property name="format">
+                   <string>%v/%m</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <layout class="QHBoxLayout" name="horizontalLayout_2">
+                  <item>
+                   <widget class="QCheckBox" name="checkBox_bcast">
+                    <property name="text">
+                     <string>bcast</string>
+                    </property>
+                    <property name="checked">
+                     <bool>true</bool>
+                    </property>
+                   </widget>
+                  </item>
+                  <item>
+                   <widget class="QCheckBox" name="checkBox_upgauto">
+                    <property name="toolTip">
+                     <string>after chngm&amp;send,auto readbp &amp; calcbp,and reloop,until bp is allone.</string>
+                    </property>
+                    <property name="text">
+                     <string>auto</string>
+                    </property>
+                    <property name="checked">
+                     <bool>true</bool>
+                    </property>
+                   </widget>
+                  </item>
+                  <item>
+                   <widget class="QCheckBox" name="checkBox_usebp">
+                    <property name="toolTip">
+                     <string>used when auto is unchecked.calcbp before chngm&amp;send.</string>
+                    </property>
+                    <property name="text">
+                     <string>usebp</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item>
+                   <widget class="QPushButton" name="pushButton_upgrade">
+                    <property name="enabled">
+                     <bool>false</bool>
+                    </property>
+                    <property name="text">
+                     <string>upgrade</string>
+                    </property>
+                   </widget>
+                  </item>
+                 </layout>
+                </item>
+               </layout>
+              </widget>
              </item>
             </layout>
            </widget>
