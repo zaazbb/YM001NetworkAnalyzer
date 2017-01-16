@@ -20,104 +20,366 @@
       <property name="orientation">
        <enum>Qt::Horizontal</enum>
       </property>
-      <property name="opaqueResize">
-       <bool>true</bool>
-      </property>
-      <property name="childrenCollapsible">
-       <bool>true</bool>
-      </property>
       <widget class="QSplitter" name="splitter_v">
        <property name="orientation">
         <enum>Qt::Vertical</enum>
        </property>
-       <widget class="QTreeWidget" name="treeWidget">
-        <property name="contextMenuPolicy">
-         <enum>Qt::CustomContextMenu</enum>
+       <widget class="QSplitter" name="splitter_cmdinfo">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
         </property>
-        <property name="indentation">
-         <number>0</number>
-        </property>
-        <property name="uniformRowHeights">
-         <bool>false</bool>
-        </property>
-        <property name="headerHidden">
-         <bool>false</bool>
-        </property>
-        <column>
-         <property name="text">
-          <string>time</string>
+        <widget class="QTreeWidget" name="treeWidget">
+         <property name="contextMenuPolicy">
+          <enum>Qt::CustomContextMenu</enum>
          </property>
-        </column>
-        <column>
-         <property name="text">
-          <string>from</string>
+         <property name="indentation">
+          <number>0</number>
          </property>
-        </column>
-        <column>
-         <property name="text">
-          <string>mFType</string>
+         <property name="uniformRowHeights">
+          <bool>false</bool>
          </property>
-        </column>
-        <column>
-         <property name="text">
-          <string>ack</string>
+         <property name="headerHidden">
+          <bool>false</bool>
          </property>
-        </column>
-        <column>
-         <property name="text">
-          <string>mI</string>
-         </property>
-        </column>
-        <column>
-         <property name="text">
-          <string>pid</string>
-         </property>
-        </column>
-        <column>
-         <property name="text">
-          <string>mDst</string>
-         </property>
-        </column>
-        <column>
-         <property name="text">
-          <string>mSrc</string>
-         </property>
-        </column>
-        <column>
-         <property name="text">
-          <string>nDst</string>
-         </property>
-        </column>
-        <column>
-         <property name="text">
-          <string>nSrc</string>
-         </property>
-        </column>
-        <column>
-         <property name="text">
-          <string>nI</string>
-         </property>
-        </column>
-        <column>
-         <property name="text">
-          <string>r</string>
-         </property>
-        </column>
-        <column>
-         <property name="text">
-          <string>routeLst</string>
-         </property>
-        </column>
-        <column>
-         <property name="text">
-          <string>aI</string>
-         </property>
-        </column>
-        <column>
-         <property name="text">
-          <string>aDUI</string>
-         </property>
-        </column>
+         <column>
+          <property name="text">
+           <string>time</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>from</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>mFType</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>ack</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>mI</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>pid</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>mDst</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>mSrc</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>nDst</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>nSrc</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>nI</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>r</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>routeLst</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>aI</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>aDUI</string>
+          </property>
+         </column>
+        </widget>
+        <widget class="QWidget" name="">
+         <layout class="QVBoxLayout" name="verticalLayout_2">
+          <item>
+           <widget class="QTreeWidget" name="treeWidget_cmdinfo">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="indentation">
+             <number>0</number>
+            </property>
+            <attribute name="headerVisible">
+             <bool>false</bool>
+            </attribute>
+            <column>
+             <property name="text">
+              <string>key</string>
+             </property>
+            </column>
+            <column>
+             <property name="text">
+              <string>value</string>
+             </property>
+            </column>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPlainTextEdit" name="plainTextEdit_pktdata"/>
+          </item>
+          <item>
+           <layout class="QHBoxLayout" name="horizontalLayout" stretch="0,0,0,1,0">
+            <property name="spacing">
+             <number>4</number>
+            </property>
+            <item>
+             <widget class="QCheckBox" name="checkBox_autoscroll">
+              <property name="text">
+               <string>滚屏</string>
+              </property>
+              <property name="checked">
+               <bool>true</bool>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLabel" name="label">
+              <property name="text">
+               <string>信道组</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QComboBox" name="comboBox_chnlgrp">
+              <property name="enabled">
+               <bool>false</bool>
+              </property>
+              <property name="maximumSize">
+               <size>
+                <width>40</width>
+                <height>16777215</height>
+               </size>
+              </property>
+              <item>
+               <property name="text">
+                <string>0</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>1</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>2</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>3</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>4</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>5</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>6</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>7</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>8</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>9</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>10</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>11</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>12</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>13</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>14</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>15</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>16</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>17</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>18</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>19</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>20</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>21</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>22</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>23</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>24</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>25</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>26</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>27</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>28</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>29</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>30</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>31</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>32</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>33</string>
+               </property>
+              </item>
+             </widget>
+            </item>
+            <item>
+             <spacer name="horizontalSpacer_3">
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>40</width>
+                <height>20</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+            <item>
+             <widget class="QPushButton" name="pushButton_parsepkt">
+              <property name="enabled">
+               <bool>false</bool>
+              </property>
+              <property name="text">
+               <string>报文解析</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+         </layout>
+        </widget>
        </widget>
        <widget class="QTabWidget" name="tabWidget_bottomSideBar">
         <property name="tabPosition">
@@ -148,26 +410,24 @@
             </item>
             <item>
              <widget class="QCheckBox" name="checkBox_autosend">
+              <property name="toolTip">
+               <string>自动发送</string>
+              </property>
               <property name="text">
-               <string>Auto</string>
+               <string>自动</string>
               </property>
              </widget>
             </item>
             <item>
              <widget class="QPushButton" name="pushButton_send">
               <property name="text">
-               <string>send</string>
+               <string>发送</string>
               </property>
              </widget>
             </item>
            </layout>
           </item>
          </layout>
-        </widget>
-        <widget class="QWidget" name="tab_6">
-         <attribute name="title">
-          <string>保留</string>
-         </attribute>
         </widget>
        </widget>
       </widget>
@@ -178,279 +438,11 @@
        <property name="currentIndex">
         <number>0</number>
        </property>
-       <widget class="QWidget" name="tab">
-        <attribute name="title">
-         <string>报文</string>
-        </attribute>
-        <layout class="QVBoxLayout" name="verticalLayout_2" stretch="1,0,0">
-         <item>
-          <widget class="QTreeWidget" name="treeWidget_cmdinfo">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="indentation">
-            <number>0</number>
-           </property>
-           <attribute name="headerVisible">
-            <bool>false</bool>
-           </attribute>
-           <column>
-            <property name="text">
-             <string>key</string>
-            </property>
-           </column>
-           <column>
-            <property name="text">
-             <string>value</string>
-            </property>
-           </column>
-          </widget>
-         </item>
-         <item>
-          <widget class="QPlainTextEdit" name="plainTextEdit_pktdata"/>
-         </item>
-         <item>
-          <layout class="QHBoxLayout" name="horizontalLayout" stretch="0,0,0,1,0">
-           <property name="spacing">
-            <number>4</number>
-           </property>
-           <item>
-            <widget class="QCheckBox" name="checkBox_autoscroll">
-             <property name="text">
-              <string>autoscroll</string>
-             </property>
-             <property name="checked">
-              <bool>true</bool>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QLabel" name="label">
-             <property name="text">
-              <string>chnlgrp</string>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QComboBox" name="comboBox_chnlgrp">
-             <property name="enabled">
-              <bool>false</bool>
-             </property>
-             <property name="maximumSize">
-              <size>
-               <width>40</width>
-               <height>16777215</height>
-              </size>
-             </property>
-             <item>
-              <property name="text">
-               <string>0</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>1</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>2</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>3</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>4</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>5</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>6</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>7</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>8</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>9</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>10</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>11</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>12</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>13</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>14</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>15</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>16</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>17</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>18</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>19</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>20</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>21</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>22</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>23</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>24</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>25</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>26</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>27</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>28</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>29</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>30</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>31</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>32</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>33</string>
-              </property>
-             </item>
-            </widget>
-           </item>
-           <item>
-            <spacer name="horizontalSpacer_3">
-             <property name="orientation">
-              <enum>Qt::Horizontal</enum>
-             </property>
-             <property name="sizeHint" stdset="0">
-              <size>
-               <width>40</width>
-               <height>20</height>
-              </size>
-             </property>
-            </spacer>
-           </item>
-           <item>
-            <widget class="QPushButton" name="pushButton_parsepkt">
-             <property name="enabled">
-              <bool>false</bool>
-             </property>
-             <property name="text">
-              <string>ParsePkt</string>
-             </property>
-            </widget>
-           </item>
-          </layout>
-         </item>
-        </layout>
-        <zorder>plainTextEdit_pktdata</zorder>
-        <zorder>treeWidget_cmdinfo</zorder>
-       </widget>
        <widget class="QWidget" name="tab_2">
         <attribute name="title">
          <string>操作</string>
         </attribute>
-        <layout class="QVBoxLayout" name="verticalLayout_8" stretch="1,0,0">
+        <layout class="QVBoxLayout" name="verticalLayout_8">
          <item>
           <widget class="QTreeWidget" name="treeWidget_node">
            <property name="contextMenuPolicy">
@@ -482,16 +474,30 @@
           </widget>
          </item>
          <item>
-          <widget class="QLineEdit" name="lineEdit_curnode">
-           <property name="text">
-            <string>888888888888</string>
-           </property>
-          </widget>
+          <layout class="QHBoxLayout" name="horizontalLayout_7" stretch="1,0">
+           <item>
+            <widget class="QLineEdit" name="lineEdit_curnode">
+             <property name="text">
+              <string>888888888888</string>
+             </property>
+             <property name="maxLength">
+              <number>12</number>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="pushButton_bcastAddr">
+             <property name="text">
+              <string>广播</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
          </item>
          <item>
           <widget class="QTabWidget" name="tabWidget_3">
            <property name="currentIndex">
-            <number>1</number>
+            <number>0</number>
            </property>
            <widget class="QWidget" name="tab_7">
             <attribute name="title">
@@ -592,7 +598,7 @@
                 <item>
                  <widget class="QCheckBox" name="checkBox_rf">
                   <property name="text">
-                   <string>RF</string>
+                   <string>无线</string>
                   </property>
                   <property name="checked">
                    <bool>true</bool>
@@ -602,7 +608,7 @@
                 <item>
                  <widget class="QCheckBox" name="checkBox_plc">
                   <property name="text">
-                   <string>PLC</string>
+                   <string>载波</string>
                   </property>
                   <property name="checked">
                    <bool>true</bool>
@@ -625,7 +631,7 @@
                 <item>
                  <widget class="QPushButton" name="pushButton_rfplcsw">
                   <property name="text">
-                   <string>RfPlcSwitch</string>
+                   <string>无线载波开关</string>
                   </property>
                  </widget>
                 </item>
@@ -633,7 +639,6 @@
               </widget>
              </item>
             </layout>
-            <zorder></zorder>
             <zorder>verticalSpacer_4</zorder>
             <zorder>groupBox</zorder>
             <zorder>groupBox_2</zorder>
@@ -785,7 +790,7 @@
                   <item>
                    <widget class="QCheckBox" name="checkBox_bcast">
                     <property name="text">
-                     <string>bcast</string>
+                     <string>广播</string>
                     </property>
                     <property name="checked">
                      <bool>true</bool>
@@ -798,7 +803,7 @@
                      <string>after chngm&amp;send,auto readbp &amp; calcbp,and reloop,until bp is allone.</string>
                     </property>
                     <property name="text">
-                     <string>auto</string>
+                     <string>自动</string>
                     </property>
                     <property name="checked">
                      <bool>true</bool>
@@ -811,7 +816,7 @@
                      <string>used when auto is unchecked.calcbp before chngm&amp;send.</string>
                     </property>
                     <property name="text">
-                     <string>usebp</string>
+                     <string>使用断点</string>
                     </property>
                    </widget>
                   </item>
@@ -821,7 +826,7 @@
                      <bool>false</bool>
                     </property>
                     <property name="text">
-                     <string>upgrade</string>
+                     <string>升级</string>
                     </property>
                    </widget>
                   </item>

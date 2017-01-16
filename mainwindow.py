@@ -23,6 +23,7 @@ class MainWindow(QMainWindow):
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
         
+        self.ui.splitter_cmdinfo.setStretchFactor(0, 1)
         self.ui.splitter_h.setStretchFactor(0, 1)
         self.ui.splitter_v.setStretchFactor(0, 1)
         self.__rightSideBar_isShrinked = False
@@ -601,3 +602,7 @@ class MainWindow(QMainWindow):
                 self.__bottomSideBar_isShrinked = True
         self.ui.tabWidget_bottomSideBar.setCurrentIndex(index)
         self.__bottomSideBar_lastIndex = index
+    
+    @pyqtSlot()
+    def on_pushButton_bcastAddr_clicked(self):
+        self.ui.lineEdit_curnode.setText('FFFFFFFFFFFF')

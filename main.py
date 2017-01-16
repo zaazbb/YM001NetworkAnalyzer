@@ -12,8 +12,7 @@ from worker import worker
 version = '0.0.3'
 
 
-#if __name__ == '__main__':
-if __name__.endswith('__main__'):
+if __name__ == '__main__':
     freeze_support()
 
     config = configparser.ConfigParser()
