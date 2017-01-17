@@ -544,17 +544,17 @@ class MainWindow(QMainWindow):
 
     @pyqtSlot()
     def on_pushButton_send_clicked(self):
-        if self.ui.pushButton_send.text() == 'send':
+        if self.ui.pushButton_send.text() == '发送':
             if self.ui.checkBox_autosend.isChecked():
                 self.autosendtimer = QTimer(self)
                 self.autosendtimer.timeout.connect(self._AutoSend)  
                 self.autosendtimer.start(5000)
-                self.ui.pushButton_send.setText('stop')
+                self.ui.pushButton_send.setText('停止')
             else:
                 self._AutoSend()
         else:
             self.autosendtimer.stop()
-            self.ui.pushButton_send.setText('send')
+            self.ui.pushButton_send.setText('发送')
 
     def _AutoSend(self):
         self._CmdPro(self.ui.comboBox_cmd.currentText())
