@@ -548,7 +548,7 @@ class MainWindow(QMainWindow):
             if self.ui.checkBox_autosend.isChecked():
                 self.autosendtimer = QTimer(self)
                 self.autosendtimer.timeout.connect(self._AutoSend)  
-                self.autosendtimer.start(5000)
+                self.autosendtimer.start(2000)
                 self.ui.pushButton_send.setText('停止')
             else:
                 self._AutoSend()
