@@ -62,7 +62,7 @@ def mk_pooltype(dst, src, index):
     template = '43 CD 00 FF FF 33 21 10 03 00 00 66 55 44 33 22 11 F1 02 01 04'
     pkt = bytearray.fromhex(template)
     i = 5
-    srcaddr = bytearray.fromhex(dst)
+    srcaddr = bytearray.fromhex(dst.zfill(12))
     srcaddr.reverse()
     pkt[i:i+6] = srcaddr
     i += 6

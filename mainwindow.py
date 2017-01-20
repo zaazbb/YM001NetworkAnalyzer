@@ -134,14 +134,22 @@ class MainWindow(QMainWindow):
             if rdata[0][9] in self.node['node']:
                 self.node['node'][rdata[0][9]]['item'] .setText(1, rdata[1]['sVer'])
                 self.ui.treeWidget_node.resizeColumnToContents(1)
+        elif rdata[0][2] == 'acxRdVerInfoUp':
+            if rdata[0][9] in self.node['node']:
+                self.node['node'][rdata[0][9]]['item'] .setText(1, rdata[1]['sver'])
+                self.node['node'][rdata[0][9]]['item'] .setText(2, rdata[1]['date'])
+                self.node['node'][rdata[0][9]]['item'] .setText(3, rdata[1]['time'])
+                self.ui.treeWidget_node.resizeColumnToContents(1)
+                self.ui.treeWidget_node.resizeColumnToContents(2)
+                self.ui.treeWidget_node.resizeColumnToContents(3)
         elif rdata[0][2] == 'mcUpgBpStsAck':
             if rdata[0][7] in self.node['node']:
                 #print(rdata)
                 self.node['node'][rdata[0][7]]['bpFlag'] = rdata[1]['bpFlag']
-                self.node['node'][rdata[0][7]]['item'] .setText(2, rdata[1]['upgRate'])
-                self.node['node'][rdata[0][7]]['item'] .setText(3, rdata[1]['bpFlag'])
-                self.ui.treeWidget_node.resizeColumnToContents(2)
-                self.ui.treeWidget_node.resizeColumnToContents(3)
+                self.node['node'][rdata[0][7]]['item'] .setText(4, rdata[1]['upgRate'])
+                self.node['node'][rdata[0][7]]['item'] .setText(5, rdata[1]['bpFlag'])
+                self.ui.treeWidget_node.resizeColumnToContents(4)
+                self.ui.treeWidget_node.resizeColumnToContents(5)
         elif rdata[0][2].startswith('mcDbg'):
             if rdata[0][7] in self.node['node']:
                 self.ui.plainTextEdit_rdbgresp.setPlainText(rdata[1]['dat'])
@@ -257,7 +265,21 @@ class MainWindow(QMainWindow):
                 item.setText(1, '')
         if self.txpkt:
             self.txtimer.start(1000)
-        
+    
+    @pyqtSlot()
+    def on_actionRdVerInfo_triggered(self): 
+        if self.txtimer.isActive() or self.upgtimer.isActive():
+            self.ui.plainTextEdit_log.appendPlainText('Tx busy.')
+            return
+        self.txpkt = []
+        for item in self.ui.treeWidget_node.selectedItems():
+            addr = item.text(0)
+            if addr in self.node['node']:
+                self.txpkt.append(upgrade.mk_rdverinfo(addr, self.upgsrc))
+                item.setText(1, '')
+        if self.txpkt:
+            self.txtimer.start(1000)
+            
     @pyqtSlot()
     def on_actionUpgBpSts_triggered(self):
         if self.txtimer.isActive() or self.upgtimer.isActive():
@@ -327,6 +349,7 @@ class MainWindow(QMainWindow):
         if self.conn and self.ui.treeWidget_node.selectedItems():
             popMenu =QMenu(self)
             popMenu.addAction(self.ui.actionRdSnCfg)
+            popMenu.addAction(self.ui.actionRdVerInfo)
             if self.__whosyourdaddy:
                 popMenu.addAction(self.ui.actionUpgBpSts)
                 popMenu.addAction(self.ui.actionRdbgPoolType)
@@ -380,8 +403,8 @@ class MainWindow(QMainWindow):
             self.ui.plainTextEdit_log.appendPlainText('[upgrade]read bpflag %s' % node)
             #print('[upgrade]read bpflag %s' % node)
             self.node['node'][node]['bpFlag'] = ''
-            self.node['node'][node]['item'] .setText(2, '')
-            self.node['node'][node]['item'] .setText(3, '')
+            self.node['node'][node]['item'] .setText(4, '')
+            self.node['node'][node]['item'] .setText(5, '')
             pkt = upgrade.mk_bpsts(node, self.upgsrc)
             self.conn.send(['send',  self.__sendchnl, pkt])
             self.ui.plainTextEdit_log.appendPlainText('Tx:'+' '.join(['%02X'%i for i in pkt]))
@@ -548,7 +571,7 @@ class MainWindow(QMainWindow):
             if self.ui.checkBox_autosend.isChecked():
                 self.autosendtimer = QTimer(self)
                 self.autosendtimer.timeout.connect(self._AutoSend)  
-                self.autosendtimer.start(2000)
+                self.autosendtimer.start(self.ui.spinBox_sendInterval.value())
                 self.ui.pushButton_send.setText('停止')
             else:
                 self._AutoSend()

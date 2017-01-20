@@ -117,7 +117,7 @@
           </property>
          </column>
         </widget>
-        <widget class="QWidget" name="">
+        <widget class="QWidget" name="layoutWidget">
          <layout class="QVBoxLayout" name="verticalLayout_2">
           <item>
            <widget class="QTreeWidget" name="treeWidget_cmdinfo">
@@ -397,7 +397,7 @@
            <widget class="QPlainTextEdit" name="plainTextEdit_log"/>
           </item>
           <item>
-           <layout class="QHBoxLayout" name="horizontalLayout_8" stretch="1,0,0">
+           <layout class="QHBoxLayout" name="horizontalLayout_8" stretch="1,0,0,0">
             <property name="spacing">
              <number>4</number>
             </property>
@@ -415,6 +415,13 @@
               </property>
               <property name="text">
                <string>自动</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QSpinBox" name="spinBox_sendInterval">
+              <property name="value">
+               <number>2</number>
               </property>
              </widget>
             </item>
@@ -453,12 +460,22 @@
            </property>
            <column>
             <property name="text">
-             <string>node</string>
+             <string>节点</string>
             </property>
            </column>
            <column>
             <property name="text">
-             <string>sver</string>
+             <string>版本</string>
+            </property>
+           </column>
+           <column>
+            <property name="text">
+             <string>日期</string>
+            </property>
+           </column>
+           <column>
+            <property name="text">
+             <string>时间</string>
             </property>
            </column>
            <column>
@@ -504,78 +521,6 @@
              <string>基本功能</string>
             </attribute>
             <layout class="QVBoxLayout" name="verticalLayout_4">
-             <item>
-              <widget class="QGroupBox" name="groupBox_2">
-               <property name="title">
-                <string>标准功能</string>
-               </property>
-               <layout class="QHBoxLayout" name="horizontalLayout_5">
-                <item>
-                 <widget class="QPushButton" name="pushButton">
-                  <property name="text">
-                   <string>读取节点配置</string>
-                  </property>
-                 </widget>
-                </item>
-                <item>
-                 <spacer name="horizontalSpacer_4">
-                  <property name="orientation">
-                   <enum>Qt::Horizontal</enum>
-                  </property>
-                  <property name="sizeHint" stdset="0">
-                   <size>
-                    <width>40</width>
-                    <height>20</height>
-                   </size>
-                  </property>
-                 </spacer>
-                </item>
-                <item>
-                 <widget class="QPushButton" name="pushButton_5">
-                  <property name="text">
-                   <string>抄07电表</string>
-                  </property>
-                 </widget>
-                </item>
-               </layout>
-              </widget>
-             </item>
-             <item>
-              <widget class="QGroupBox" name="groupBox_3">
-               <property name="title">
-                <string>扩展功能</string>
-               </property>
-               <layout class="QHBoxLayout" name="horizontalLayout_6">
-                <item>
-                 <widget class="QPushButton" name="pushButton_2">
-                  <property name="text">
-                   <string>读取扩展信息</string>
-                  </property>
-                 </widget>
-                </item>
-                <item>
-                 <widget class="QPushButton" name="pushButton_4">
-                  <property name="text">
-                   <string>读取版本信息</string>
-                  </property>
-                 </widget>
-                </item>
-                <item>
-                 <spacer name="horizontalSpacer_5">
-                  <property name="orientation">
-                   <enum>Qt::Horizontal</enum>
-                  </property>
-                  <property name="sizeHint" stdset="0">
-                   <size>
-                    <width>40</width>
-                    <height>20</height>
-                   </size>
-                  </property>
-                 </spacer>
-                </item>
-               </layout>
-              </widget>
-             </item>
              <item>
               <spacer name="verticalSpacer_4">
                <property name="orientation">
@@ -641,8 +586,6 @@
             </layout>
             <zorder>verticalSpacer_4</zorder>
             <zorder>groupBox</zorder>
-            <zorder>groupBox_2</zorder>
-            <zorder>groupBox_3</zorder>
            </widget>
            <widget class="QWidget" name="tab_8">
             <attribute name="title">
@@ -848,12 +791,12 @@
   </widget>
   <action name="actionSaveAs">
    <property name="text">
-    <string>SaveAs</string>
+    <string>保存</string>
    </property>
   </action>
   <action name="actionLoad">
    <property name="text">
-    <string>Load</string>
+    <string>载入</string>
    </property>
   </action>
   <action name="actionUpgBpSts">
@@ -868,7 +811,7 @@
   </action>
   <action name="actionRdSnCfg">
    <property name="text">
-    <string>rdSnCfg</string>
+    <string>读取节点配置</string>
    </property>
   </action>
   <action name="actionUpgRdBack">
@@ -878,12 +821,12 @@
   </action>
   <action name="actionRmParsed">
    <property name="text">
-    <string>rmParsed</string>
+    <string>移除报文解析</string>
    </property>
   </action>
   <action name="actionClear">
    <property name="text">
-    <string>clear</string>
+    <string>清空</string>
    </property>
   </action>
   <action name="actionRdbgPoolType">
@@ -894,6 +837,11 @@
   <action name="actionEraseParam">
    <property name="text">
     <string>-eraseParam</string>
+   </property>
+  </action>
+  <action name="actionRdVerInfo">
+   <property name="text">
+    <string>读取版本信息</string>
    </property>
   </action>
  </widget>

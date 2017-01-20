@@ -149,6 +149,26 @@ def mk_rdsncfg(dst, src):
     pkt[i:i+6] = srcaddr
     i += 6
     return pkt
+
+def mk_rdverinfo(dst, src):
+    template = '41 CD 03 FF FF 09 01 50 24 03 15 66 55 44 33 22 11 7C 09 01 50 24 03 15 66 55 44 33 22 11 20 01 02 FE 4D 59 06'
+    pkt = bytearray.fromhex(template)
+    i = 5
+    dstaddr = bytearray.fromhex(dst.zfill(12))
+    dstaddr.reverse()
+    pkt[i:i+6] = dstaddr
+    i += 6
+    srcaddr = bytearray.fromhex(src)
+    srcaddr.reverse()
+    pkt[i:i+6] = srcaddr
+    i += 6
+    # nwk control
+    i += 1
+    pkt[i:i+6] = dstaddr
+    i += 6
+    pkt[i:i+6] = srcaddr
+    i += 6
+    return pkt
     
 def mk_readback(dst, src):
     template = '63 CD 01 FF FF 11 11 22 22 33 33 FF FF FF FF FF FF F0 07'
