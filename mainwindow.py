@@ -4,7 +4,7 @@ import pickle
 from datetime import datetime
 #import traceback
 
-from PyQt5.QtWidgets import QMainWindow, QTreeWidgetItem, QMenu, QFileDialog
+from PyQt5.QtWidgets import QMainWindow, QTreeWidgetItem, QMenu, QFileDialog, QColorDialog
 from PyQt5.QtGui import QBrush, QCursor
 from PyQt5.QtCore import QTimer, pyqtSlot, Qt, QPoint
 
@@ -96,9 +96,6 @@ class MainWindow(QMainWindow):
                 self.timer.timeout.connect(self.update)
                 self.timer.start(100)     
                 self.upgsrc = self.config['upgrade']['srcaddr'][:12].lstrip('0')
-                self.upgtimer = QTimer(self)
-                self.upgtimer.setSingleShot(True)
-                self.upgtimer.timeout.connect(self.upgrade)
                 self.txtimer = QTimer(self)
                 self.txtimer.setSingleShot(True)
                 self.txtimer.timeout.connect(self.txpacket)
@@ -142,14 +139,6 @@ class MainWindow(QMainWindow):
                 self.ui.treeWidget_node.resizeColumnToContents(1)
                 self.ui.treeWidget_node.resizeColumnToContents(2)
                 self.ui.treeWidget_node.resizeColumnToContents(3)
-        elif rdata[0][2] == 'mcUpgBpStsAck':
-            if rdata[0][7] in self.node['node']:
-                #print(rdata)
-                self.node['node'][rdata[0][7]]['bpFlag'] = rdata[1]['bpFlag']
-                self.node['node'][rdata[0][7]]['item'] .setText(4, rdata[1]['upgRate'])
-                self.node['node'][rdata[0][7]]['item'] .setText(5, rdata[1]['bpFlag'])
-                self.ui.treeWidget_node.resizeColumnToContents(4)
-                self.ui.treeWidget_node.resizeColumnToContents(5)
         elif rdata[0][2].startswith('mcDbg'):
             if rdata[0][7] in self.node['node']:
                 self.ui.plainTextEdit_rdbgresp.setPlainText(rdata[1]['dat'])
@@ -212,6 +201,11 @@ class MainWindow(QMainWindow):
     @pyqtSlot(QPoint)
     def on_treeWidget_customContextMenuRequested(self, pos):
         popMenu =QMenu(self)
+        if self.ui.treeWidget.itemAt(pos):
+            column = self.ui.treeWidget.header().logicalIndexAt(pos)
+            if 6 <= column <= 9:
+                popMenu.addAction(self.ui.actionHighlight)  
+                popMenu.addSeparator()
         if self.ui.treeWidget.topLevelItemCount():
             popMenu.addAction(self.ui.actionSaveAs)
             popMenu.addAction(self.ui.actionLoad)
@@ -244,6 +238,20 @@ class MainWindow(QMainWindow):
             self.load_file(file)
             
     @pyqtSlot()
+    def on_actionHighlight_triggered(self):
+        color = QColorDialog.getColor(parent=self)
+        if color.isValid(): 
+            item = self.ui.treeWidget.currentItem()
+            column = self.ui.treeWidget.currentColumn()
+            addr = item.text(column)
+            self.highlight[addr] = color
+            for i in range(self.ui.treeWidget.topLevelItemCount()):
+                item = self.ui.treeWidget.topLevelItem(i)
+                for j in range(6, 10):
+                    if addr ==  item.text(j):
+                        item.setBackground(j, color)
+
+    @pyqtSlot()
     def on_actionRmParsed_triggered(self):
         self.ui.treeWidget.takeTopLevelItem(0)
         
@@ -254,7 +262,7 @@ class MainWindow(QMainWindow):
             
     @pyqtSlot()
     def on_actionRdSnCfg_triggered(self):    
-        if self.txtimer.isActive() or self.upgtimer.isActive():
+        if self.txtimer.isActive():
             self.ui.plainTextEdit_log.appendPlainText('Tx busy.')
             return
         self.txpkt = []
@@ -268,7 +276,7 @@ class MainWindow(QMainWindow):
     
     @pyqtSlot()
     def on_actionRdVerInfo_triggered(self): 
-        if self.txtimer.isActive() or self.upgtimer.isActive():
+        if self.txtimer.isActive():
             self.ui.plainTextEdit_log.appendPlainText('Tx busy.')
             return
         self.txpkt = []
@@ -277,21 +285,6 @@ class MainWindow(QMainWindow):
             if addr in self.node['node']:
                 self.txpkt.append(upgrade.mk_rdverinfo(addr, self.upgsrc))
                 item.setText(1, '')
-        if self.txpkt:
-            self.txtimer.start(1000)
-            
-    @pyqtSlot()
-    def on_actionUpgBpSts_triggered(self):
-        if self.txtimer.isActive() or self.upgtimer.isActive():
-            self.ui.plainTextEdit_log.appendPlainText('Tx busy.')
-            return
-        self.txpkt = []
-        for item in self.ui.treeWidget_node.selectedItems():
-            addr = item.text(0)
-            if addr in self.node['node']:
-                self.txpkt.append(upgrade.mk_bpsts(addr, self.upgsrc))
-                item.setText(2, '')
-                item.setText(3, '')
         if self.txpkt:
             self.txtimer.start(1000)
 
@@ -317,22 +310,6 @@ class MainWindow(QMainWindow):
             self.conn.send(['send',  self.__sendchnl, pkt])
             self.ui.plainTextEdit_log.appendPlainText('Tx:'+' '.join(['%02X'%i for i in pkt]))
 
-    @pyqtSlot()
-    def on_actionUpgTxm_triggered(self):
-        items=self.ui.treeWidget_node.selectedItems()     
-        addr = items[0].text(0)
-        pkt = upgrade.mk_chng2txm(addr, self.upgsrc,  not self.ui.checkBox_bcast.isChecked())
-        self.conn.send(['send',  self.__sendchnl, pkt])
-        self.ui.plainTextEdit_log.appendPlainText('Tx:'+' '.join(['%02X'%i for i in pkt]))
-            
-    @pyqtSlot()
-    def on_actionUpgRdBack_triggered(self):
-        items=self.ui.treeWidget_node.selectedItems()     
-        addr = items[0].text(0)
-        pkt = upgrade.mk_readback(addr, self.upgsrc)
-        self.conn.send(['send',  self.__sendchnl, pkt])
-        self.ui.plainTextEdit_log.appendPlainText('Tx:'+' '.join(['%02X'%i for i in pkt]))
-
     def txpacket(self):
         if self.txpkt:
             self.conn.send(['send',  self.__sendchnl, self.txpkt[0]])
@@ -351,146 +328,10 @@ class MainWindow(QMainWindow):
             popMenu.addAction(self.ui.actionRdSnCfg)
             popMenu.addAction(self.ui.actionRdVerInfo)
             if self.__whosyourdaddy:
-                popMenu.addAction(self.ui.actionUpgBpSts)
                 popMenu.addAction(self.ui.actionRdbgPoolType)
                 popMenu.addSeparator()
                 popMenu.addAction(self.ui.actionEraseParam)
-                popMenu.addSeparator()
-                popMenu.addAction(self.ui.actionUpgTxm)  
-                popMenu.addSeparator()
-                popMenu.addAction(self.ui.actionUpgRdBack)  
             popMenu.popup(QCursor.pos())
-
-    @pyqtSlot()
-    def on_pushButton_upgrade_clicked(self):
-        if self.txtimer.isActive() or self.upgtimer.isActive():
-            self.ui.plainTextEdit_log.appendPlainText('Tx busy.')
-            return
-        if self.ui.checkBox_bcast.isChecked():
-            self.upgdst = 'FFFFFFFFFFFF'
-        else:
-            items = self.ui.treeWidget_node.selectedItems()    
-            if len(items) == 1:
-                self.upgdst = items[0].text(0)
-            else:
-                self.ui.plainTextEdit_log.appendPlainText('[upg]Please select only one node.')
-                return
-        self.upgrdbplst = []
-        self.upgi = 0
-        self.upgdata = upgrade.get_app_code(self.config['upgrade']['file'])
-        self.upgflen = self.upgdata[0x400+2]+self.upgdata[0x400+7]*0x100
-        self.upgsver = int.from_bytes(self.upgdata[0x100:0x104], 'big')
-        self.upghver = int.from_bytes(self.upgdata[0x104:0x106], 'big')
-        self.upgvid = int.from_bytes(self.upgdata[0x106:0x108], 'big')
-        self.upgcrc = int.from_bytes(self.upgdata[-4:], 'big')
-        # auto = 1, change mode - send data - read bp - calc bp , and loop.
-        # auto = 0, change mode - send data.
-        # when auto = 0, usebp = 1, calc bp - change mode - send data.
-        # when auto = 0, usebp = 0, change mode - send data.
-        if self.ui.checkBox_upgauto.isChecked() or not self.ui.checkBox_usebp.isChecked():
-            # 0 - change mode, 1 - send data, 2 - calc bpflag
-            self.upgsts = 0
-            self.upgbpflag = ['0'] * self.upgflen
-            self.ui.progressBar_upgrade.setValue(0)
-            self.ui.progressBar_upgrade.setMaximum(self.upgflen)
-        else:
-            self.upgsts = 2
-        self.upgtimer.start(100)
-        
-    def upgrade(self):
-        if self.upgrdbplst:
-            node = self.upgrdbplst[self.upgi]
-            self.ui.plainTextEdit_log.appendPlainText('[upgrade]read bpflag %s' % node)
-            #print('[upgrade]read bpflag %s' % node)
-            self.node['node'][node]['bpFlag'] = ''
-            self.node['node'][node]['item'] .setText(4, '')
-            self.node['node'][node]['item'] .setText(5, '')
-            pkt = upgrade.mk_bpsts(node, self.upgsrc)
-            self.conn.send(['send',  self.__sendchnl, pkt])
-            self.ui.plainTextEdit_log.appendPlainText('Tx:'+' '.join(['%02X'%i for i in pkt]))
-            self.upgi += 1
-            if self.upgi == len(self.upgrdbplst):
-                self.upgi = 0
-                self.upgrdbplst = []
-                self.upgsts = 2
-            self.upgtimer.start(1000)
-        else:
-            if self.upgsts == 0:
-                self.ui.plainTextEdit_log.appendPlainText('[upgrade]switch upgrade rxd mode.')
-                #print('[upgrade]switch upgrade rxd mode.')
-                pkt = upgrade.mk_upg02(self.upgdst, self.upgsrc, self.upgvid, self.upghver, self.upgflen, self.upgsver, self.upgcrc)
-                self.conn.send(['send',  self.__sendchnl, pkt]) 
-                #self.ui.plainTextEdit_log.appendPlainText('Tx:'+' '.join(['%02X'%i for i in pkt]))
-                #print('Tx:'+' '.join(['%02X'%i for i in pkt]))
-                self.upgi += 1
-                # send chngm 5 times.
-                if self.upgi < 5:
-                    self.upgtimer.start(500)
-                else:
-                    self.upgsts = 1
-                    self.upgi = 0
-                    self.upgtimer.start(2000)
-            elif self.upgsts == 1:
-                for i in range(self.upgi, self.upgflen):
-                    if self.upgbpflag[i] == '0':
-                        #self.ui.plainTextEdit_log.appendPlainText('[upgrade]send packet %i.' % i)
-                        #print('[upgrade]: send packet %i.' % i)
-                        pkt = upgrade.mk_upg04(
-                            self.upgdst,  self.upgsrc, self.upgvid, self.upgflen, self.upgcrc, i+1, self.upgdata[i*128:i*128+128])
-                        self.conn.send(['send',  self.__sendchnl, pkt]) 
-                        #self.ui.plainTextEdit_log.appendPlainText('Tx:'+' '.join(['%02X'%ii for ii in pkt]))
-                        #print('Tx:'+' '.join(['%02X'%ii for ii in pkt]))
-                        self.upgbpflag[i] = '1'
-                        max = self.ui.progressBar_upgrade.maximum()
-                        self.ui.progressBar_upgrade.setValue(max - self.upgbpflag.count('0'))
-                        self.upgi = i+1
-                        if self.upgdst == 'FFFFFFFFFFFF':
-                            self.upgtimer.start(300)
-                        else:
-                            self.upgtimer.start(500)
-                        break
-                else:
-                    if self.ui.checkBox_upgauto.isChecked():
-                        self.upgi = 0
-                        if self.upgdst == 'FFFFFFFFFFFF':
-                            self.upgrdbplst = list(self.node['node'].keys())
-                        else:
-                            self.upgrdbplst =[self.upgdst]
-                        self.upgtimer.start(500)
-                    else:
-                        self.ui.plainTextEdit_log.appendPlainText('[upgrade]upgrade finished.')
-                        #print('[upgrade]upgrade finished.')
-            else:
-                self.upgsts = 0
-                self.upgi = 0
-                totbpflag = bytearray(b'\xFF' * 64)
-                if self.upgdst == 'FFFFFFFFFFFF':
-                    for node in self.node['node']:
-                        if self.node['node'][node]['bpFlag']:
-                            bpflag = bytes.fromhex(self.node['node'][node]['bpFlag'])
-                            for i in range(64):
-                                totbpflag[i] &= bpflag[i]
-                else:
-                    if self.upgdst in self.node['node'] and self.node['node'][self.upgdst]['bpFlag']:
-                            bpflag = bytes.fromhex(self.node['node'][self.upgdst]['bpFlag'])
-                            for i in range(64):
-                                totbpflag[i] &= bpflag[i]
-                self.upgbpflag = []
-                for i in range(64):
-                    flag = list('{:08b}'.format(totbpflag[i]))
-                    flag.reverse()
-                    self.upgbpflag.extend(flag)
-                self.upgbpflag = self.upgbpflag[:self.upgflen]
-                self.ui.plainTextEdit_log.appendPlainText('[upgrade]totbpflag %s' % ''.join(self.upgbpflag))
-                #print('[upgrade]totbpflag %s' % ''.join(self.upgbpflag))
-                max = self.upgbpflag.count('0')
-                if max:
-                    self.ui.progressBar_upgrade.setMaximum(max)
-                    self.ui.progressBar_upgrade.setValue(0)
-                    self.upgtimer.start(1000)
-                else:
-                    self.ui.plainTextEdit_log.appendPlainText('[upgrade]upgrade finished.')
-                    #print('[upgrade]upgrade finished.')
 
     @pyqtSlot(QTreeWidgetItem, int)
     def on_treeWidget_rdbglst_itemClicked(self, item, column):
@@ -571,7 +412,7 @@ class MainWindow(QMainWindow):
             if self.ui.checkBox_autosend.isChecked():
                 self.autosendtimer = QTimer(self)
                 self.autosendtimer.timeout.connect(self._AutoSend)  
-                self.autosendtimer.start(self.ui.spinBox_sendInterval.value())
+                self.autosendtimer.start(self.ui.spinBox_sendInterval.value() * 1000)
                 self.ui.pushButton_send.setText('停止')
             else:
                 self._AutoSend()

@@ -478,16 +478,6 @@
              <string>时间</string>
             </property>
            </column>
-           <column>
-            <property name="text">
-             <string>upgRate</string>
-            </property>
-           </column>
-           <column>
-            <property name="text">
-             <string>bpFlag</string>
-            </property>
-           </column>
           </widget>
          </item>
          <item>
@@ -698,87 +688,7 @@
             <attribute name="title">
              <string>远程升级</string>
             </attribute>
-            <layout class="QVBoxLayout" name="verticalLayout_9">
-             <item>
-              <spacer name="verticalSpacer_5">
-               <property name="orientation">
-                <enum>Qt::Vertical</enum>
-               </property>
-               <property name="sizeHint" stdset="0">
-                <size>
-                 <width>20</width>
-                 <height>40</height>
-                </size>
-               </property>
-              </spacer>
-             </item>
-             <item>
-              <widget class="QGroupBox" name="groupBox_4">
-               <property name="title">
-                <string>旧版功能</string>
-               </property>
-               <layout class="QVBoxLayout" name="verticalLayout_6">
-                <item>
-                 <widget class="QProgressBar" name="progressBar_upgrade">
-                  <property name="value">
-                   <number>0</number>
-                  </property>
-                  <property name="format">
-                   <string>%v/%m</string>
-                  </property>
-                 </widget>
-                </item>
-                <item>
-                 <layout class="QHBoxLayout" name="horizontalLayout_2">
-                  <item>
-                   <widget class="QCheckBox" name="checkBox_bcast">
-                    <property name="text">
-                     <string>广播</string>
-                    </property>
-                    <property name="checked">
-                     <bool>true</bool>
-                    </property>
-                   </widget>
-                  </item>
-                  <item>
-                   <widget class="QCheckBox" name="checkBox_upgauto">
-                    <property name="toolTip">
-                     <string>after chngm&amp;send,auto readbp &amp; calcbp,and reloop,until bp is allone.</string>
-                    </property>
-                    <property name="text">
-                     <string>自动</string>
-                    </property>
-                    <property name="checked">
-                     <bool>true</bool>
-                    </property>
-                   </widget>
-                  </item>
-                  <item>
-                   <widget class="QCheckBox" name="checkBox_usebp">
-                    <property name="toolTip">
-                     <string>used when auto is unchecked.calcbp before chngm&amp;send.</string>
-                    </property>
-                    <property name="text">
-                     <string>使用断点</string>
-                    </property>
-                   </widget>
-                  </item>
-                  <item>
-                   <widget class="QPushButton" name="pushButton_upgrade">
-                    <property name="enabled">
-                     <bool>false</bool>
-                    </property>
-                    <property name="text">
-                     <string>升级</string>
-                    </property>
-                   </widget>
-                  </item>
-                 </layout>
-                </item>
-               </layout>
-              </widget>
-             </item>
-            </layout>
+            <layout class="QVBoxLayout" name="verticalLayout_9"/>
            </widget>
           </widget>
          </item>
@@ -799,24 +709,9 @@
     <string>载入</string>
    </property>
   </action>
-  <action name="actionUpgBpSts">
-   <property name="text">
-    <string>upgBpSts</string>
-   </property>
-  </action>
-  <action name="actionUpgTxm">
-   <property name="text">
-    <string>-upgTxm</string>
-   </property>
-  </action>
   <action name="actionRdSnCfg">
    <property name="text">
     <string>读取节点配置</string>
-   </property>
-  </action>
-  <action name="actionUpgRdBack">
-   <property name="text">
-    <string>-upgRdBack</string>
    </property>
   </action>
   <action name="actionRmParsed">
@@ -842,6 +737,11 @@
   <action name="actionRdVerInfo">
    <property name="text">
     <string>读取版本信息</string>
+   </property>
+  </action>
+  <action name="actionHighlight">
+   <property name="text">
+    <string>高亮</string>
    </property>
   </action>
  </widget>
