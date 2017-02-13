@@ -587,6 +587,10 @@ def PacketParser(pkt):
                         cmdinfo['reportInfo'] = '--'
                 else:
                     cmdinfo['reportType'] = '--'
+                i += 1
+                cmdinfo['evtId'] = str(pkt[i])
+                i += 1
+                cmdinfo['pkt645Len'] = str(pkt[i])
                 baseinfo.append(cmdinfo['reportType'])
             else:
                 baseinfo.append(str(pkt[i]))
