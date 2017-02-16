@@ -90,7 +90,6 @@ class MainWindow(QMainWindow):
                 self.conn = conn_file
                 self.ui.comboBox_chnlgrp.setEnabled(True)
                 self.ui.pushButton_parsepkt.setEnabled(True)
-                self.ui.pushButton_upgrade.setEnabled(True)
                 self.ui.pushButton_rdbgsend.setEnabled(True)
                 self.timer = QTimer(self)
                 self.timer.timeout.connect(self.update)
@@ -107,7 +106,6 @@ class MainWindow(QMainWindow):
         if not self.__whosyourdaddy:
             self.ui.pushButton_rdbgsend.setEnabled(False)
             self.ui.pushButton_rfplcsw.setEnabled(False)
-            self.ui.pushButton_upgrade.setEnabled(False)
             
 
     def load_file(self, file):

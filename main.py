@@ -45,12 +45,15 @@ if __name__ == '__main__':
     for i in config['DEFAULT']['nodes'].split(','):
         node = i.split()
         color = node[1] if len(node) > 1 else ''
+        addr = node[0].lstrip('mx0')
+        if not addr:
+            addr = '0'
         if node[0][0] == 'm':
-            nodes['mnode'] = [node[0][1:13].lstrip('0'), color]
+            nodes['mnode'] = [addr, color]
         elif node[0][0] == 'x':
-            nodes['xnode'][node[0][1:13].lstrip('0')] = color
+            nodes['xnode'][addr] = color
         else:
-            nodes['node'][node[0][:12].lstrip('0')] = {'color': color, 'bpFlag': ''}
+            nodes['node'][addr] = {'color': color}
     #print(nodes)       
     
     from PyQt5.QtWidgets import QApplication
